@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget, QHBoxLayout, QPushButton, QLineEdit, QListWidgetItem
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QEvent
 from PySide6.QtGui import QIcon
 import os
 from print_tricks import pt
@@ -8,7 +8,7 @@ class FileExplorer(QWidget):
     def __init__(self):
         super().__init__()
         self.name = "File Explorer"
-        self.current_path = '/'
+        self.current_path = os.path.expanduser('~')
         self.history = []
         self.history_index = -1
         self.initUI()
@@ -29,8 +29,12 @@ class FileExplorer(QWidget):
         self.up_button = QPushButton('↑')
         self.up_button.setFixedSize(30, 30)
         self.up_button.clicked.connect(self.go_up)
+        
         self.path_display = QLineEdit(self.current_path)
-        self.path_display.setReadOnly(True)
+        self.path_display.setReadOnly(False)
+        self.path_display.setToolTip(self.current_path)  # Set tooltip to display full path
+        self.path_display.installEventFilter(self)  # Install event filter for click behavior
+        
         nav_layout.addWidget(self.back_button)
         nav_layout.addWidget(self.forward_button)
         nav_layout.addWidget(self.up_button)
@@ -91,5 +95,15 @@ class FileExplorer(QWidget):
                 self.history = self.history[:self.history_index + 1]
                 self.history.append(self.current_path)
                 self.history_index += 1
-        self.path_display.setText(self.current_path)
+        self.path_display.setText(os.path.abspath(self.current_path))
+        self.path_display.setToolTip(self.current_path)  # Update tooltip with new path
         self.populate_listbox(self.listbox)
+
+    def eventFilter(self, source, event):
+        if source == self.path_display and event.type() == QEvent.MouseButtonPress:
+            if not self.path_display.hasFocus():
+                self.path_display.selectAll()  # Select all text on first click
+            else:
+                self.path_display.deselect()  # Deselect text on subsequent clicks
+            return True
+        return super().eventFilter(source, event)
