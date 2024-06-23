@@ -17,7 +17,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Dynamic GUI")
-        self.setGeometry(100, 100, 1920, 1080)
+        self.setGeometry(1111, 333, 1920, 1080)
         self.setCentralWidget(QWidget())
         self.centralWidget().setLayout(QVBoxLayout())
 
@@ -44,7 +44,7 @@ class MainWindow(QMainWindow):
 
         self.centralWidget().layout().addWidget(top_frame)
 
-    def create_middle_frame_area(self):
+    def create_middle_frame_area(self, org_access_pct=7, org_sub_access_pct=7, ai_area_pct=7, search_area_pct=7):
         middle_frame = QFrame()
         middle_frame.setFrameShape(QFrame.StyledPanel)
         middle_layout = QHBoxLayout(middle_frame)
@@ -56,13 +56,16 @@ class MainWindow(QMainWindow):
         ai_area = AIArea()
         search_area = SearchArea()
 
-        middle_layout.addWidget(org_access, 7)
-        middle_layout.addWidget(org_sub_access, 7)
-        middle_layout.addWidget(file_explorer_area, 72)  # Remaining width
-        middle_layout.addWidget(ai_area, 7)
-        middle_layout.addWidget(search_area, 7)
+        remaining_pct = 100 - (org_access_pct + org_sub_access_pct + ai_area_pct + search_area_pct)
+
+        middle_layout.addWidget(org_access, org_access_pct)
+        middle_layout.addWidget(org_sub_access, org_sub_access_pct)
+        middle_layout.addWidget(file_explorer_area, remaining_pct)
+        middle_layout.addWidget(ai_area, ai_area_pct)
+        middle_layout.addWidget(search_area, search_area_pct)
 
         self.centralWidget().layout().addWidget(middle_frame)
+
 
     def create_bottom_frame_area(self):
         bottom_frame = QFrame()
