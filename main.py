@@ -56,11 +56,11 @@ class MainWindow(QMainWindow):
         ai_area = AIArea()
         search_area = SearchArea()
 
-        middle_layout.addWidget(org_access)
-        middle_layout.addWidget(org_sub_access)
-        middle_layout.addWidget(file_explorer_area)
-        middle_layout.addWidget(ai_area)
-        middle_layout.addWidget(search_area)
+        middle_layout.addWidget(org_access, 7)
+        middle_layout.addWidget(org_sub_access, 7)
+        middle_layout.addWidget(file_explorer_area, 72)  # Remaining width
+        middle_layout.addWidget(ai_area, 7)
+        middle_layout.addWidget(search_area, 7)
 
         self.centralWidget().layout().addWidget(middle_frame)
 
