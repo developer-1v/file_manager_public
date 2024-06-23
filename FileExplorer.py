@@ -5,9 +5,11 @@ import os
 class FileExplorer(QWidget):
     def __init__(self):
         super().__init__()
+        self.name = "File Explorer"
         self.initUI()
 
     def initUI(self):
+        self.setToolTip(self.name)
         layout = QVBoxLayout()
         self.setLayout(layout)
         listbox = QListWidget(self)

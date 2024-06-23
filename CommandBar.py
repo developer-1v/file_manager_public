@@ -5,12 +5,14 @@ class CommandBar(QWidget):
     print('----blah')
     def __init__(self):
         super().__init__()
+        self.name = "Command Bar"
         self.initUI()
+        
 
     def initUI(self):
-        ...
+        self.setToolTip(self.name)
         # layout = QVBoxLayout()
         # self.setLayout(layout)
-        label = QLabel("Command Bar", self)
+        label = QLabel(self.name, self)
         print('--2')
         # layout.addWidget(label)
