@@ -1,135 +1,128 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QScrollArea, QFrame
-from PyQt5.QtCore import QSize, Qt
-import sys
+from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QFrame, QSplitter, QLabel
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QCursor
 from MenuBar import MenuBar
 from CommandBar import CommandBar
+from TopFrame3 import TopFrame3
+from TopFrame4 import TopFrame4
 from OrgAccess import OrgAccess
 from OrgSubAccess import OrgSubAccess
 from FileExplorer import FileExplorer
 from AIArea import AIArea
 from SearchArea import SearchArea
 from TreeView import TreeView
-from TopFrame3 import TopFrame3
-from TopFrame4 import TopFrame4
+from Properties import Properties
 
-
-
-class FileManager(QWidget):
-    def __init__(self, 
-            rows=1, 
-            columns=4, 
-            left_frames=2, 
-            right_frames=2, 
-            left_side=True, 
-            top_frames=4, 
-            window_width=1200, 
-            window_height=800, 
-            window_position=(100, 100), 
-            spacing=0,
-            top_frames_height=55, 
-            vertical_frame_width=200,
-            bottom_frame_height=200,
-        ):
+class MainWindow(QMainWindow):
+    def __init__(self):
         super().__init__()
+        self.setWindowTitle("Dynamic GUI")
+        self.setGeometry(100, 100, 1920, 1080)
+        self.setCentralWidget(QFrame())
+        self.centralWidget().setLayout(QVBoxLayout())
         
-        self.initUI(rows, columns, left_frames, right_frames, left_side, top_frames, window_width, window_height, window_position, spacing, top_frames_height, vertical_frame_width, bottom_frame_height)
+        self.create_top_frame_area()
+        self.create_middle_frame_area()
+        self.create_bottom_frame_area()
 
-    def initUI(self, rows, columns, left_frames, right_frames, left_side, top_frames, window_width, window_height, window_position, spacing, top_frames_height, vertical_frame_width, bottom_frame_height):
-        self.setWindowTitle('Configurable Grid File Explorer')
-        self.setGeometry(100, 100, window_width, window_height)
-
-        grid = QGridLayout()
-        grid.setSpacing(spacing)
-        self.setLayout(grid)
-
-        def create_frame(widget_class, width_percent, height_percent, min_width, min_height):
+    def create_top_frame_area(self):
+        top_frame = QFrame()
+        top_frame.setFrameShape(QFrame.StyledPanel)
+        top_frame.setLayout(QVBoxLayout())
+        top_frame.setFixedHeight(self.height() * 0.18)
+        
+        menu_bar = MenuBar()
+        command_bar = CommandBar()
+        top_frame3 = TopFrame3()
+        top_frame4 = TopFrame4()
+        
+        for widget in [menu_bar, command_bar, top_frame3, top_frame4]:
             frame = QFrame()
-            frame.setFrameShape(QFrame.Box)
-            frame.setLineWidth(1)
-            frame.setMinimumSize(min_width, min_height)
-            frame.setFixedSize(int(window_width * width_percent), int(window_height * height_percent))
-            scroll_area = QScrollArea()
-            scroll_area.setWidgetResizable(True)
-            scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-            scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-            widget = widget_class()
-            scroll_area.setWidget(widget)
-            layout = QGridLayout()
-            layout.setContentsMargins(0, 0, 0, 0)
-            layout.addWidget(scroll_area)
-            frame.setLayout(layout)
-            return frame
+            frame.setFrameShape(QFrame.StyledPanel)
+            frame.setLayout(QVBoxLayout())
+            frame.layout().addWidget(widget)
+            frame.setFixedHeight(top_frame.height() * 0.25)
+            frame.setToolTip(widget.__class__.__name__)
+            top_frame.layout().addWidget(frame)
+        
+        self.centralWidget().layout().addWidget(top_frame)
 
-        # Add top frames
-        top_frame_classes = [MenuBar, CommandBar, TopFrame3, TopFrame4]
-        top_frame_sizes = [(1.0, 0.1, 100, 25), (1.0, 0.1, 100, 25), (1.0, 0.1, 100, 25), (1.0, 0.1, 100, 25)]
-        for i in range(min(top_frames, 4)):
-            if top_frame_classes[i]:
-                width_percent, height_percent, min_width, min_height = top_frame_sizes[i]
-                frame = create_frame(top_frame_classes[i], width_percent, height_percent, min_width, min_height)
-                grid.addWidget(frame, i, 0, 1, columns + left_frames + right_frames)
+    def create_middle_frame_area(self):
+        middle_frame = QSplitter(Qt.Horizontal)
+        middle_frame.setFrameShape(QFrame.StyledPanel)
+        
+        org_access = OrgAccess()
+        org_sub_access = OrgSubAccess()
+        file_explorer_area = self.create_file_explorer_area()
+        ai_area = AIArea()
+        search_area = SearchArea()
+        
+        for widget in [org_access, org_sub_access, file_explorer_area, ai_area, search_area]:
+            frame = QFrame()
+            frame.setFrameShape(QFrame.StyledPanel)
+            frame.setLayout(QVBoxLayout())
+            frame.layout().addWidget(widget)
+            frame.setToolTip(widget.__class__.__name__)
+            middle_frame.addWidget(frame)
+        
+        self.centralWidget().layout().addWidget(middle_frame)
 
-        # Calculate height for vertical and inner frames
-        vertical_frame_height_percent = (window_height - sum([window_height * size[1] for size in top_frame_sizes]) - bottom_frame_height) / window_height
-        middle_frame_height_percent = vertical_frame_height_percent
+    def create_bottom_frame_area(self):
+        bottom_frame = QFrame()
+        bottom_frame.setFrameShape(QFrame.StyledPanel)
+        bottom_frame.setLayout(QHBoxLayout())
+        bottom_frame.setFixedHeight(self.height() * 0.05)
+        
+        properties = Properties()
+        tree_view = TreeView()
+        
+        for widget in [properties, tree_view]:
+            frame = QFrame()
+            frame.setFrameShape(QFrame.StyledPanel)
+            frame.setLayout(QVBoxLayout())
+            frame.layout().addWidget(widget)
+            frame.setToolTip(widget.__class__.__name__)
+            bottom_frame.layout().addWidget(frame)
+        
+        self.centralWidget().layout().addWidget(bottom_frame)
 
-        # Add left or right vertical frames
-        vertical_frame_classes = [OrgAccess, OrgSubAccess]
-        if left_side:
-            for i in range(left_frames):
-                frame = create_frame(vertical_frame_classes[i], vertical_frame_width / window_width, vertical_frame_height_percent, 100, 100)
-                grid.addWidget(frame, top_frames, i, rows, 1)
-        else:
-            for i in range(right_frames):
-                frame = create_frame(vertical_frame_classes[i], vertical_frame_width / window_width, vertical_frame_height_percent, 100, 100)
-                grid.addWidget(frame, top_frames, columns + 1 + i, rows, 1)
+    def create_file_explorer_area(self):
+        file_explorer_area = QFrame()
+        file_explorer_area.setFrameShape(QFrame.StyledPanel)
+        file_explorer_area.setLayout(QVBoxLayout())
+        
+        for _ in range(6):  # Example with 6 FileExplorer instances
+            file_explorer = FileExplorer()
+            frame = QFrame()
+            frame.setFrameShape(QFrame.StyledPanel)
+            frame.setLayout(QVBoxLayout())
+            frame.layout().addWidget(file_explorer)
+            frame.setToolTip(file_explorer.__class__.__name__)
+            file_explorer_area.layout().addWidget(frame)
+        
+        return file_explorer_area
 
-        # Add file explorer frames
-        for r in range(rows):
-            for c in range(columns):
-                frame = create_frame(FileExplorer, vertical_frame_width / window_width, middle_frame_height_percent, 100, 100)
-                if left_side:
-                    grid.addWidget(frame, top_frames + r, left_frames + c, 1, 1)
-                else:
-                    grid.addWidget(frame, top_frames + r, c, 1, 1)
-
-        # Add right vertical frames if left_side is True
-        if not left_side:
-            for i in range(right_frames):
-                frame = create_frame(vertical_frame_classes[i], vertical_frame_width / window_width, vertical_frame_height_percent, 100, 100)
-                grid.addWidget(frame, top_frames, columns + left_frames + i, rows, 1)
-
-        # Add extra frames
-        extra_frame_classes = [AIArea, SearchArea]
-        if left_side:
-            for i in range(right_frames):
-                frame = create_frame(extra_frame_classes[i], vertical_frame_width / window_width, vertical_frame_height_percent, 100, 100)
-                grid.addWidget(frame, top_frames, columns + left_frames + i, rows, 1)
-        else:
-            for i in range(left_frames):
-                frame = create_frame(extra_frame_classes[i], vertical_frame_width / window_width, vertical_frame_height_percent, 100, 100)
-                grid.addWidget(frame, top_frames, i, rows, 1)
-
-        # Add bottom frame
-        bottom_frame = create_frame(TreeView, 1.0, bottom_frame_height / window_height, 100, 25)
-        grid.addWidget(bottom_frame, top_frames + rows, 0, 1, columns + left_frames + right_frames)
+if __name__ == "__main__":
+    app = QApplication([])
+    window = MainWindow()
+    window.show()
+    app.exec()
 
 
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    fm = FileManager(
-        rows=2, 
-        columns=3, 
-        left_frames=2, 
-        right_frames=2, 
-        left_side=True, 
-        top_frames=4, 
-        window_width=1920, 
-        window_height=1080, 
-        spacing=0,
-        top_frames_height=25,
-        vertical_frame_width=200,
-        bottom_frame_height=25)
-    fm.show()
-    sys.exit(app.exec_())
+
+
+'''
+
+1 - Give me the complete code that meets all of my requirements, even if it takes additional prompts and don't explain, just show the code. Also, go over your own answer to make sure it covers all of my requirements. 
+2 - use pyside6 to create a gui that can dynamically change the size of its internal frames based on the changing size of the window. Set the window size to be variable, but default to 1920x1080, and centered on the screen. 
+3 - In general, any frame area and sub frame area that we create should have a parameter passed to change the percentage width and height size of the frame area and each individual frame. 
+4 - And frame areas should be able to have the mouse click/drag on their borders to resize them. 
+5 - Hovering over a frame will say what that sub frame area is. 
+6 - The spacing between each frame should be configurable, but default to just 1.
+7 - Make a top frame area that contains 4 subframes. The subframes will hold the imported instances of MenuBar, CommandBar, TopFrame3, and TopFrame4. The top frame area should be 100% width and defaulted to 18% height of the window. Each subframe should be vertically stacked on each other and take up 100% of the width and .25% of the height of the top frame area. 
+8 - NOw make a bottom frames area. This will be 100% width and defaulted to 5% height of the window. This will contain 2 subframes. The subframes will hold the imported instances of Properties and TreeView. 
+9 - NOw make a middle frames area. This will be 100% width and it's % height will be the height that is left over after subtracting the top and bottom frame areas from the window. This middle frames area will contain 5 subframes in order horizontally from left to right that contain the imported instances of OrgAccess, OrgSubAccess, FileExplorerArea, AIArea, and SearchArea. These will all take up 7% of the width and 100% of the height of the middle frames area, except for the FileExplorerArea that will take up the remaining % of the width and 100% of the height of the middle frames area. 
+10 - The FileExplorerArea Will contain a variable amount of 1 to 6 imported instances of FileExplorer. It should have a configurable number of rows and columns. Let's default this to 2 rows and 3 columns. 
+11 - use my imports to create the gui. 
+'''

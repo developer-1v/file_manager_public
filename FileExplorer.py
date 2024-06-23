@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QListWidget
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget
+from PySide6.QtCore import Qt
 import os
 
 class FileExplorer(QWidget):
