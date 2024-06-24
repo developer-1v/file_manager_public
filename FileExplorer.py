@@ -1,7 +1,8 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget, QHBoxLayout, QPushButton, QLineEdit, QListWidgetItem
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget, QHBoxLayout, QPushButton, QLineEdit, QListWidgetItem, QApplication
 from PySide6.QtCore import Qt, QEvent
 from PySide6.QtGui import QIcon
 import os
+import sys
 from print_tricks import pt
 
 class FileExplorer(QWidget):
@@ -31,9 +32,8 @@ class FileExplorer(QWidget):
         self.up_button.clicked.connect(self.go_up)
         
         self.path_display = QLineEdit(self.current_path)
-        self.path_display.setReadOnly(False)
+        self.path_display.setReadOnly(False)  # Allow editing
         self.path_display.setToolTip(self.current_path)  # Set tooltip to display full path
-        self.path_display.installEventFilter(self)  # Install event filter for click behavior
         
         nav_layout.addWidget(self.back_button)
         nav_layout.addWidget(self.forward_button)
@@ -107,3 +107,10 @@ class FileExplorer(QWidget):
                 self.path_display.deselect()  # Deselect text on subsequent clicks
             return True
         return super().eventFilter(source, event)
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    file_explorer = FileExplorer()
+    file_explorer.show()
+    sys.exit(app.exec())
