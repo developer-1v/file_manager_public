@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget, QHBoxLayout, QPushButton, QLineEdit, QListWidgetItem, QApplication
-from PySide6.QtCore import Qt, QEvent
+from PySide6.QtCore import Qt, QEvent, QTimer
 from PySide6.QtGui import QIcon
 import os
 import sys
@@ -12,6 +12,9 @@ class FileExplorer(QWidget):
         self.current_path = os.path.expanduser('~')
         self.history = []
         self.history_index = -1
+        
+        self.path_display_had_focus = False
+        
         self.initUI()
 
     def initUI(self):
@@ -34,6 +37,7 @@ class FileExplorer(QWidget):
         self.path_display = QLineEdit(self.current_path)
         self.path_display.setReadOnly(False)  # Allow editing
         self.path_display.setToolTip(self.current_path)  # Set tooltip to display full path
+        self.path_display.installEventFilter(self)  # Install event filter for custom behavior
         
         nav_layout.addWidget(self.back_button)
         nav_layout.addWidget(self.forward_button)
@@ -99,18 +103,24 @@ class FileExplorer(QWidget):
         self.path_display.setToolTip(self.current_path)  # Update tooltip with new path
         self.populate_listbox(self.listbox)
 
+
     def eventFilter(self, source, event):
         if source == self.path_display and event.type() == QEvent.MouseButtonPress:
-            if not self.path_display.hasFocus():
-                self.path_display.selectAll()  # Select all text on first click
-            else:
-                self.path_display.deselect()  # Deselect text on subsequent clicks
-            return True
+            pt()
+            if not self.path_display_had_focus:
+                pt()
+                QTimer.singleShot(0, self.path_display.selectAll)  # Select all text after the event
+                self.path_display_had_focus = True  # Update focus state
+                return True  # Indicate that the event has been handled
+        elif event.type() == QEvent.FocusOut and source == self.path_display:
+            pt()
+            self.path_display_had_focus = False  # Reset focus state on focus out
         return super().eventFilter(source, event)
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     file_explorer = FileExplorer()
+    file_explorer.resize(800, 600)
     file_explorer.show()
     sys.exit(app.exec())

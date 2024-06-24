@@ -108,6 +108,8 @@ if __name__ == "__main__":
 
 
 '''
+C:\Users\user
+C:\Users\usercode
 
 1 - Give me the complete code that meets all of my requirements, even if it takes additional prompts and don't explain, just show the code. Also, go over your own answer to make sure it covers all of my requirements. 
 2 - use pyside6 to create a gui that can dynamically change the size of its internal frames based on the changing size of the window. Set the window size to be variable, but default to 1920x1080, and centered on the screen. 
