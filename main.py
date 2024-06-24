@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QFrame, QSplitter, QLabel, QWidget
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QCursor
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QCursor, QPalette, QColor
 from MenuBar import MenuBar
 from CommandBar import CommandBar
 from TopFrame3 import TopFrame3
@@ -20,6 +20,7 @@ class MainWindow(QMainWindow):
         self.setGeometry(1111, 333, 1920, 1080)
         self.setCentralWidget(QWidget())
         self.centralWidget().setLayout(QVBoxLayout())
+        self.setStyleSheet("background-color: #2E3440; color: #D8DEE9;")
 
         self.create_top_frame_area()
         self.create_middle_frame_area()
@@ -50,11 +51,11 @@ class MainWindow(QMainWindow):
         middle_layout = QHBoxLayout(middle_frame)
         middle_layout.setSpacing(1)
 
-        org_access = OrgAccess()
-        org_sub_access = OrgSubAccess()
+        org_access = self.create_collapsible_frame(OrgAccess(), org_access_pct)
+        org_sub_access = self.create_collapsible_frame(OrgSubAccess(), org_sub_access_pct)
         file_explorer_area = self.create_file_explorer_area()
-        ai_area = AIArea()
-        search_area = SearchArea()
+        ai_area = self.create_collapsible_frame(AIArea(), ai_area_pct)
+        search_area = self.create_collapsible_frame(SearchArea(), search_area_pct)
 
         remaining_pct = 100 - (org_access_pct + org_sub_access_pct + ai_area_pct + search_area_pct)
 
@@ -65,7 +66,6 @@ class MainWindow(QMainWindow):
         middle_layout.addWidget(search_area, search_area_pct)
 
         self.centralWidget().layout().addWidget(middle_frame)
-
 
     def create_bottom_frame_area(self):
         bottom_frame = QFrame()
@@ -82,27 +82,45 @@ class MainWindow(QMainWindow):
 
         self.centralWidget().layout().addWidget(bottom_frame)
 
-    def create_file_explorer_area(self):
+    def create_file_explorer_area(self, rows=2, columns=3):
         file_explorer_area = QFrame()
         file_explorer_area.setFrameShape(QFrame.StyledPanel)
         file_explorer_layout = QVBoxLayout(file_explorer_area)
         file_explorer_layout.setSpacing(1)
 
-        for _ in range(2):  # 2 rows
+        for _ in range(rows):  # 2 rows
             row_layout = QHBoxLayout()
-            for _ in range(3):  # 3 columns
+            for _ in range(columns):  # 3 columns
                 file_explorer = FileExplorer()
                 row_layout.addWidget(file_explorer)
             file_explorer_layout.addLayout(row_layout)
 
         return file_explorer_area
 
+    def create_collapsible_frame(self, widget, pct):
+        frame = QFrame()
+        frame.setFrameShape(QFrame.StyledPanel)
+        frame.setFixedWidth(self.width() * (pct / 100))
+        layout = QVBoxLayout(frame)
+        layout.addWidget(widget)
+        frame.setFixedWidth(self.width() * 0.01)  # Start collapsed
+
+        def expand():
+            frame.setFixedWidth(self.width() * (pct / 100))
+
+        def collapse():
+            frame.setFixedWidth(self.width() * 0.01)
+
+        frame.enterEvent = lambda event: expand()
+        frame.leaveEvent = lambda event: collapse()
+
+        return frame
+
 if __name__ == "__main__":
     app = QApplication([])
     window = MainWindow()
     window.show()
     app.exec()
-
 
 
 
