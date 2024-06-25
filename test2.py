@@ -59,12 +59,11 @@ class BackgroundVideoPlayer(QWidget):
         # Enable dragging the window by the title bar
         self.title_bar.mousePressEvent = self.start_drag
         self.title_bar.mouseMoveEvent = self.do_drag
-
         # Create additional UI elements
         self.label1 = QLabel("Label 1", self)
-        self.label1.setStyleSheet("background-color: yellow;")  # Set background color for label1
+        self.label1.setStyleSheet("background-color: yellow;")
         self.label2 = QLabel("Label 2", self)
-        self.label2.setStyleSheet("background-color: lightblue;")  # Set background color for label2
+        self.label2.setStyleSheet("background-color: lightblue;")
         self.input1 = QLineEdit(self)
         self.input2 = QLineEdit(self)
 
@@ -76,7 +75,7 @@ class BackgroundVideoPlayer(QWidget):
 
         # Layouts
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)  # No spacing
+        main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.addWidget(self.gif_label)
 
         ui_layout = QVBoxLayout()
@@ -87,21 +86,18 @@ class BackgroundVideoPlayer(QWidget):
         ui_layout.addWidget(self.file_tree)
 
         # Frame to overlay UI elements
-        ui_frame = QFrame(self.gif_label)  # Attach ui_frame to gif_label
-        ui_frame.setLayout(ui_layout)
-        ui_frame.setStyleSheet("background: rgba(222, 222, 222, 0.7); color: #D8DEE9;")
-        ## key:                x, y, width, height
-        # ui_frame.setGeometry(0, self.title_bar_height, 111, self.height() - self.title_bar_height +550)  # Adjust position and size
+        self.ui_frame = QFrame(self.gif_label)  # Attach ui_frame to gif_label
+        self.ui_frame.setLayout(ui_layout)
+        self.ui_frame.setStyleSheet("background: rgba(222, 222, 222, 0.7); color: #D8DEE9;")
+        self.ui_frame.setGeometry(0, self.title_bar_height, 111, self.height() - self.title_bar_height + 550)  # Adjust position and size
 
-        # Add the frame on top of the video
-        self.gif_label.setLayout(QVBoxLayout())
-        self.gif_label.layout().addWidget(ui_frame)
 
         self.setLayout(main_layout)
 
         # Resize the gif to the size of the window
         self.gif_label.setScaledContents(True)
         self.gif_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+
 
         self.setLayout(main_layout)
 
@@ -115,7 +111,9 @@ class BackgroundVideoPlayer(QWidget):
         self.minimize_button.setGeometry(self.width() - 90, 0, 30, self.title_bar_height)
         self.maximize_button.setGeometry(self.width() - 60, 0, 30, self.title_bar_height)
         self.close_button.setGeometry(self.width() - 30, 0, 30, self.title_bar_height)
-        self.gif_label.layout().itemAt(0).widget().setGeometry(0, self.title_bar_height, self.width(), self.height() - self.title_bar_height)  # Adjust ui_f
+        # Adjust ui_frame geometry directly
+        self.ui_frame.setGeometry(0, self.title_bar_height, self.width(), self.height() - self.title_bar_height)
+
 
     def start_drag(self, event):
         if event.button() == Qt.LeftButton:
