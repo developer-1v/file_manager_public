@@ -10,6 +10,7 @@ from PySide6.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout, QHBoxL
 class BackgroundVideoPlayer(QWidget):
     def __init__(self):
         super().__init__()
+        self.title_bar_height = 30  # Define a variable for the title bar height
         self.setWindowFlags(Qt.FramelessWindowHint)  # Remove the default title bar
         self.setGeometry(1111, 333, 1920, 1080)
 
@@ -22,14 +23,13 @@ class BackgroundVideoPlayer(QWidget):
         # Create a custom title bar
         self.title_bar = QFrame(self)  # Attach title bar to self instead of gif_label
         self.title_bar.setStyleSheet("background: rgba(55, 55, 55, 0.8); color: #D8DEE9;")
-        self.title_bar.setFixedHeight(30)
+        self.title_bar.setFixedHeight(self.title_bar_height)
         self.title_bar_layout = QHBoxLayout(self.title_bar)
         self.title_bar_layout.setContentsMargins(0, 0, 0, 0)
 
         # Add title label in the center
         self.title_label = QLabel("Custom Title Bar", self.title_bar)
         self.title_label.setAlignment(Qt.AlignCenter)
-
 
         # Add minimize, maximize, and close buttons with fixed sizes
         button_style = "QPushButton { width: 30px; height: 30px; }"
@@ -62,7 +62,9 @@ class BackgroundVideoPlayer(QWidget):
 
         # Create additional UI elements
         self.label1 = QLabel("Label 1", self)
+        self.label1.setStyleSheet("background-color: yellow;")  # Set background color for label1
         self.label2 = QLabel("Label 2", self)
+        self.label2.setStyleSheet("background-color: lightblue;")  # Set background color for label2
         self.input1 = QLineEdit(self)
         self.input2 = QLineEdit(self)
 
@@ -84,11 +86,12 @@ class BackgroundVideoPlayer(QWidget):
         ui_layout.addWidget(self.input2)
         ui_layout.addWidget(self.file_tree)
 
-
         # Frame to overlay UI elements
         ui_frame = QFrame(self.gif_label)  # Attach ui_frame to gif_label
         ui_frame.setLayout(ui_layout)
-        ui_frame.setStyleSheet("background: rgba(55, 55, 55, 0.5); color: #D8DEE9;")
+        ui_frame.setStyleSheet("background: rgba(222, 222, 222, 0.7); color: #D8DEE9;")
+        ## key:                x, y, width, height
+        # ui_frame.setGeometry(0, self.title_bar_height, 111, self.height() - self.title_bar_height +550)  # Adjust position and size
 
         # Add the frame on top of the video
         self.gif_label.setLayout(QVBoxLayout())
@@ -107,11 +110,12 @@ class BackgroundVideoPlayer(QWidget):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        self.title_bar.setGeometry(0, 0, self.width(), 30)
-        self.title_label.setGeometry(self.width() // 2 - 100, 0, 200, 30)
-        self.minimize_button.setGeometry(self.width() - 90, 0, 30, 30)
-        self.maximize_button.setGeometry(self.width() - 60, 0, 30, 30)
-        self.close_button.setGeometry(self.width() - 30, 0, 30, 30)
+        self.title_bar.setGeometry(0, 0, self.width(), self.title_bar_height)
+        self.title_label.setGeometry(self.width() // 2 - 100, 0, 200, self.title_bar_height)
+        self.minimize_button.setGeometry(self.width() - 90, 0, 30, self.title_bar_height)
+        self.maximize_button.setGeometry(self.width() - 60, 0, 30, self.title_bar_height)
+        self.close_button.setGeometry(self.width() - 30, 0, 30, self.title_bar_height)
+        self.gif_label.layout().itemAt(0).widget().setGeometry(0, self.title_bar_height, self.width(), self.height() - self.title_bar_height)  # Adjust ui_f
 
     def start_drag(self, event):
         if event.button() == Qt.LeftButton:
