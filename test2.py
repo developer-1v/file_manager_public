@@ -1,123 +1,123 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QFrame, QSplitter, QLabel, QWidget
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QCursor, QPalette, QColor
-from MenuBar import MenuBar
-from CommandBar import CommandBar
-from TopFrame3 import TopFrame3
-from TopFrame4 import TopFrame4
-from OrgAccess import OrgAccess
-from OrgSubAccess import OrgSubAccess
-from FileExplorer import FileExplorer
-from AIArea import AIArea
-from SearchArea import SearchArea
-from TreeView import TreeView
-from Properties import Properties
+import sys
+from PySide6.QtCore import QUrl, QTimer, Qt  # Added Qt import
+from PySide6.QtGui import QMovie
+from PySide6.QtMultimedia import QMediaPlayer
+from PySide6.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout, QHBoxLayout, QLineEdit, QTreeView, QFrame, QFileSystemModel, QSizePolicy, QPushButton  # Added QPushButton import
 
-class MainWindow(QMainWindow):
+
+
+
+class BackgroundVideoPlayer(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Dynamic GUI")
-        self.setGeometry(0, 0, 1920, 1080)
-        self.setCentralWidget(QWidget())
-        self.centralWidget().setLayout(QVBoxLayout())
-        self.setStyleSheet("background-color: #2E3440; color: #D8DEE9;")
+        self.setWindowFlags(Qt.FramelessWindowHint)  # Remove the default title bar
+        self.setGeometry(1111, 333, 1920, 1080)
 
-        self.create_top_frame_area()
-        self.create_middle_frame_area()
-        self.create_bottom_frame_area()
+        # Create a QLabel to display the GIF
+        self.gif_label = QLabel(self)
+        self.movie = QMovie("lightspeed-10957.gif")
+        self.gif_label.setMovie(self.movie)
+        self.movie.start()
 
-    def create_top_frame_area(self):
-        top_frame = QFrame()
-        top_frame.setFrameShape(QFrame.StyledPanel)
-        top_frame.setFixedHeight(self.height() * 0.18)
-        top_layout = QVBoxLayout(top_frame)
-        top_layout.setSpacing(1)
+        # Create a custom title bar
+        self.title_bar = QFrame(self.gif_label)  # Attach title bar to gif_label
+        self.title_bar.setStyleSheet("background: rgba(55, 55, 55, 0.8); color: #D8DEE9;")
+        self.title_bar.setFixedHeight(30)
+        self.title_bar_layout = QHBoxLayout(self.title_bar)
+        self.title_bar_layout.setContentsMargins(0, 0, 0, 0)
 
-        menu_bar = MenuBar()
-        command_bar = CommandBar()
-        top_frame3 = TopFrame3()
-        top_frame4 = TopFrame4()
+        # Add title label in the center
+        self.title_label = QLabel("Custom Title Bar", self.title_bar)
+        self.title_label.setAlignment(Qt.AlignCenter)
 
-        top_layout.addWidget(menu_bar)
-        top_layout.addWidget(command_bar)
-        top_layout.addWidget(top_frame3)
-        top_layout.addWidget(top_frame4)
+        # Add minimize, maximize, and close buttons with fixed sizes
+        button_style = "QPushButton { width: 30px; height: 30px; }"
+        self.minimize_button = QPushButton("-", self.title_bar)
+        self.minimize_button.setStyleSheet(button_style)
+        self.maximize_button = QPushButton("□", self.title_bar)
+        self.maximize_button.setStyleSheet(button_style)
+        self.close_button = QPushButton("X", self.title_bar)
+        self.close_button.setStyleSheet(button_style)
 
-        self.centralWidget().layout().addWidget(top_frame)
+        # Add a spacer to push the title to the center and buttons to the right
+        self.title_bar_layout.addStretch()  # Add stretch before title
+        self.title_bar_layout.addWidget(self.title_label)
+        self.title_bar_layout.addStretch()  # Add stretch after title
+        self.title_bar_layout.addWidget(self.minimize_button)
+        self.title_bar_layout.addWidget(self.maximize_button)
+        self.title_bar_layout.addWidget(self.close_button)
+        ...
 
-    def create_middle_frame_area(self, org_access_pct=7, org_sub_access_pct=7, ai_area_pct=7, search_area_pct=7):
-        middle_frame = QFrame()
-        middle_frame.setFrameShape(QFrame.StyledPanel)
-        middle_layout = QHBoxLayout(middle_frame)
-        middle_layout.setSpacing(1)
+        # Connect buttons to their functions
+        self.minimize_button.clicked.connect(self.showMinimized)
+        self.maximize_button.clicked.connect(self.toggleMaximizeRestore)
+        self.close_button.clicked.connect(self.close)
 
-        org_access = self.create_collapsible_frame(OrgAccess(), org_access_pct)
-        org_sub_access = self.create_collapsible_frame(OrgSubAccess(), org_sub_access_pct)
-        file_explorer_area = self.create_file_explorer_area()
-        ai_area = self.create_collapsible_frame(AIArea(), ai_area_pct)
-        search_area = self.create_collapsible_frame(SearchArea(), search_area_pct)
+        # Enable dragging the window by the title bar
+        self.title_bar.mousePressEvent = self.start_drag
+        self.title_bar.mouseMoveEvent = self.do_drag
 
-        remaining_pct = 100 - (org_access_pct + org_sub_access_pct + ai_area_pct + search_area_pct)
+        # Create additional UI elements
+        self.label1 = QLabel("Label 1", self)
+        self.label2 = QLabel("Label 2", self)
+        self.input1 = QLineEdit(self)
+        self.input2 = QLineEdit(self)
 
-        middle_layout.addWidget(org_access, org_access_pct)
-        middle_layout.addWidget(org_sub_access, org_sub_access_pct)
-        middle_layout.addWidget(file_explorer_area, remaining_pct)
-        middle_layout.addWidget(ai_area, ai_area_pct)
-        middle_layout.addWidget(search_area, search_area_pct)
+        # Create a file tree view
+        self.file_tree = QTreeView(self)
+        self.file_model = QFileSystemModel()
+        self.file_model.setRootPath('')
+        self.file_tree.setModel(self.file_model)
 
-        self.centralWidget().layout().addWidget(middle_frame)
+        # Layouts
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)  # No spacing
+        main_layout.addWidget(self.gif_label)
 
-    def create_bottom_frame_area(self):
-        bottom_frame = QFrame()
-        bottom_frame.setFrameShape(QFrame.StyledPanel)
-        bottom_frame.setFixedHeight(self.height() * 0.05)
-        bottom_layout = QHBoxLayout(bottom_frame)
-        bottom_layout.setSpacing(1)
+        ui_layout = QVBoxLayout()
+        ui_layout.addWidget(self.label1)
+        ui_layout.addWidget(self.input1)
+        ui_layout.addWidget(self.label2)
+        ui_layout.addWidget(self.input2)
+        ui_layout.addWidget(self.file_tree)
 
-        properties = Properties()
-        tree_view = TreeView()
+        # Frame to overlay UI elements
+        ui_frame = QFrame(self)
+        ui_frame.setLayout(ui_layout)
+        ui_frame.setStyleSheet("background: rgba(55, 55, 55, 0.5); color: #D8DEE9;")
 
-        bottom_layout.addWidget(properties)
-        bottom_layout.addWidget(tree_view)
+        # Add the frame on top of the video
+        self.gif_label.setLayout(QVBoxLayout())
+        self.gif_label.layout().addWidget(ui_frame)
 
-        self.centralWidget().layout().addWidget(bottom_frame)
+        self.setLayout(main_layout)
 
-    def create_file_explorer_area(self, rows=2, columns=3):
-        file_explorer_area = QFrame()
-        file_explorer_area.setFrameShape(QFrame.StyledPanel)
-        file_explorer_layout = QVBoxLayout(file_explorer_area)
-        file_explorer_layout.setSpacing(1)
+        # Resize the gif to the size of the window
+        self.gif_label.setScaledContents(True)
+        self.gif_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
 
-        for _ in range(rows):  # 2 rows
-            row_layout = QHBoxLayout()
-            for _ in range(columns):  # 3 columns
-                file_explorer = FileExplorer()
-                row_layout.addWidget(file_explorer)
-            file_explorer_layout.addLayout(row_layout)
+        self.setLayout(main_layout)
 
-        return file_explorer_area
+        # Show the widget
+        self.show()
 
-    def create_collapsible_frame(self, widget, pct):
-        frame = QFrame()
-        frame.setFrameShape(QFrame.StyledPanel)
-        frame.setFixedWidth(self.width() * (pct / 100))
-        layout = QVBoxLayout(frame)
-        layout.addWidget(widget)
-        frame.setFixedWidth(self.width() * 0.01)  # Start collapsed
+    def start_drag(self, event):
+        if event.button() == Qt.LeftButton:
+            self.drag_position = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            event.accept()
 
-        def expand():
-            frame.setFixedWidth(self.width() * (pct / 100))
+    def do_drag(self, event):
+        if event.buttons() == Qt.LeftButton:
+            self.move(event.globalPosition().toPoint() - self.drag_position)
+            event.accept()
 
-        def collapse():
-            frame.setFixedWidth(self.width() * 0.01)
-
-        frame.enterEvent = lambda event: expand()
-        frame.leaveEvent = lambda event: collapse()
-
-        return frame
+    def toggleMaximizeRestore(self):
+        if self.isMaximized():
+            self.showNormal()
+        else:
+            self.showMaximized()
 
 if __name__ == "__main__":
     app = QApplication([])
-    window = MainWindow()
-    window.show()
-    app.exec()
+    player = BackgroundVideoPlayer()
+    sys.exit(app.exec())
