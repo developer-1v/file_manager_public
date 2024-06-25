@@ -20,7 +20,7 @@ class BackgroundVideoPlayer(QWidget):
         self.movie.start()
 
         # Create a custom title bar
-        self.title_bar = QFrame(self.gif_label)  # Attach title bar to gif_label
+        self.title_bar = QFrame(self)  # Attach title bar to self instead of gif_label
         self.title_bar.setStyleSheet("background: rgba(55, 55, 55, 0.8); color: #D8DEE9;")
         self.title_bar.setFixedHeight(30)
         self.title_bar_layout = QHBoxLayout(self.title_bar)
@@ -29,6 +29,7 @@ class BackgroundVideoPlayer(QWidget):
         # Add title label in the center
         self.title_label = QLabel("Custom Title Bar", self.title_bar)
         self.title_label.setAlignment(Qt.AlignCenter)
+
 
         # Add minimize, maximize, and close buttons with fixed sizes
         button_style = "QPushButton { width: 30px; height: 30px; }"
@@ -39,14 +40,16 @@ class BackgroundVideoPlayer(QWidget):
         self.close_button = QPushButton("X", self.title_bar)
         self.close_button.setStyleSheet(button_style)
 
-        # Add a spacer to push the title to the center and buttons to the right
-        self.title_bar_layout.addStretch()  # Add stretch before title
+        # Add widgets to layout
+        self.title_bar_layout.addStretch()
+        self.title_bar_layout.addStretch()
+
         self.title_bar_layout.addWidget(self.title_label)
-        self.title_bar_layout.addStretch()  # Add stretch after title
+        self.title_bar_layout.addStretch() 
+
         self.title_bar_layout.addWidget(self.minimize_button)
         self.title_bar_layout.addWidget(self.maximize_button)
         self.title_bar_layout.addWidget(self.close_button)
-        ...
 
         # Connect buttons to their functions
         self.minimize_button.clicked.connect(self.showMinimized)
@@ -81,8 +84,9 @@ class BackgroundVideoPlayer(QWidget):
         ui_layout.addWidget(self.input2)
         ui_layout.addWidget(self.file_tree)
 
+
         # Frame to overlay UI elements
-        ui_frame = QFrame(self)
+        ui_frame = QFrame(self.gif_label)  # Attach ui_frame to gif_label
         ui_frame.setLayout(ui_layout)
         ui_frame.setStyleSheet("background: rgba(55, 55, 55, 0.5); color: #D8DEE9;")
 
@@ -100,6 +104,14 @@ class BackgroundVideoPlayer(QWidget):
 
         # Show the widget
         self.show()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.title_bar.setGeometry(0, 0, self.width(), 30)
+        self.title_label.setGeometry(self.width() // 2 - 100, 0, 200, 30)
+        self.minimize_button.setGeometry(self.width() - 90, 0, 30, 30)
+        self.maximize_button.setGeometry(self.width() - 60, 0, 30, 30)
+        self.close_button.setGeometry(self.width() - 30, 0, 30, 30)
 
     def start_drag(self, event):
         if event.button() == Qt.LeftButton:
