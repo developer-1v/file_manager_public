@@ -10,12 +10,16 @@ class CustomVideoPlayer(QMainWindow):
     def __init__(self):
         super().__init__()
         self.title_bar_height = 30
+        self.button_size_percentage = 0.05  # Button size as a percentage of window width
+        self.button_spacing_percentage = 0.01  # Spacing as a percentage of window width
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setGeometry(1111, 333, 1920, 1080)
         self.resizing = False  # Add a flag to track resizing
 
         self.initUI()
         self.show()
+
+
 
     def initUI(self):
         self.central_widget = QWidget(self)
@@ -134,7 +138,9 @@ class CustomVideoPlayer(QMainWindow):
             self.do_drag(event)
 
     def is_on_edge(self, pos):
-        pt.every(0.3)
+        pt()
+        if pt.every(1.5):
+            pt.t()
         margin = 10
         on_left_edge = pos.x() <= margin
         on_right_edge = pos.x() >= self.width() - margin
@@ -159,17 +165,23 @@ class CustomVideoPlayer(QMainWindow):
         self.setGeometry(new_x, new_y, new_width, new_height)
         self.drag_position = event.globalPosition().toPoint()
 
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
+        button_size = int(self.width() * self.button_size_percentage)
+        button_spacing = int(self.width() * self.button_spacing_percentage)
+        
         self.title_bar.setGeometry(0, 0, self.width(), self.title_bar_height)
         self.title_label.setGeometry(self.width() // 2 - 100, 0, 200, self.title_bar_height)
-        self.minimize_button.setGeometry(self.width() - 90, 0, 30, self.title_bar_height)
-        self.maximize_button.setGeometry(self.width() - 60, 0, 30, self.title_bar_height)
-        self.close_button.setGeometry(self.width() - 30, 0, 30, self.title_bar_height)
+        self.minimize_button.setGeometry(self.width() - 3 * (button_size + button_spacing), 0, button_size, self.title_bar_height)
+        self.maximize_button.setGeometry(self.width() - 2 * (button_size + button_spacing), 0, button_size, self.title_bar_height)
+        self.close_button.setGeometry(self.width() - (button_size + button_spacing), 0, button_size, self.title_bar_height)
         self.ui_frame.setGeometry(0, self.title_bar_height, self.width(), self.height() - self.title_bar_height)
-        self.minimize_button.setFixedSize(30, self.title_bar_height)  # Ensure fixed size
-        self.maximize_button.setFixedSize(30, self.title_bar_height)  # Ensure fixed size
-        self.close_button.setFixedSize(30, self.title_bar_height)  # Ensure fixed size
+        # Remove fixed size to restore original button size
+        self.minimize_button.setFixedSize(button_size, self.title_bar_height)  # Ensure fixed size
+        self.maximize_button.setFixedSize(button_size, self.title_bar_height)  # Ensure fixed size
+        self.close_button.setFixedSize(button_size, self.title_bar_height)  # Ensure fixed size
+
 
     def mouseReleaseEvent(self, event):
         self.resizing = False
