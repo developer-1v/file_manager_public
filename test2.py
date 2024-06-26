@@ -1,4 +1,4 @@
-
+from print_tricks import pt
 
 import sys
 from PySide6.QtCore import Qt
@@ -113,33 +113,50 @@ class CustomVideoPlayer(QMainWindow):
         self.file_tree.setModel(self.file_model)
 
 
-
     def mousePressEvent(self, event):
+        pt()
         if event.button() == Qt.LeftButton:
-            if self.is_on_edge(event.pos()):
+            if self.is_on_edge(event.position().toPoint()):
                 self.resizing = True
                 self.drag_position = event.globalPosition().toPoint()
             else:
                 self.start_drag(event)
 
     def mouseMoveEvent(self, event):
+        pt()
         if self.resizing:
             self.do_resize(event)
         else:
+            if self.is_on_edge(event.position().toPoint()):
+                self.setCursor(Qt.SizeFDiagCursor)
+            else:
+                self.setCursor(Qt.ArrowCursor)
             self.do_drag(event)
 
-    def mouseReleaseEvent(self, event):
-        self.resizing = False
-
     def is_on_edge(self, pos):
+        pt.every(0.3)
         margin = 10
-        return pos.x() >= self.width() - margin or pos.y() >= self.height() - margin
+        on_left_edge = pos.x() <= margin
+        on_right_edge = pos.x() >= self.width() - margin
+        on_bottom_edge = pos.y() >= self.height() - margin
+        return on_left_edge or on_right_edge or on_bottom_edge
 
     def do_resize(self, event):
         delta = event.globalPosition().toPoint() - self.drag_position
-        new_width = self.width() + delta.x()
-        new_height = self.height() + delta.y()
-        self.setGeometry(self.x(), self.y(), new_width, new_height)
+        new_width = self.width()
+        new_height = self.height()
+        new_x = self.x()
+        new_y = self.y()
+
+        if self.drag_position.x() <= 10:  # Left edge
+            new_width -= delta.x()
+            new_x += delta.x()
+        elif self.drag_position.x() >= self.width() - 10:  # Right edge
+            new_width += delta.x()
+        if self.drag_position.y() >= self.height() - 10:  # Bottom edge
+            new_height += delta.y()
+
+        self.setGeometry(new_x, new_y, new_width, new_height)
         self.drag_position = event.globalPosition().toPoint()
 
     def resizeEvent(self, event):
@@ -150,7 +167,12 @@ class CustomVideoPlayer(QMainWindow):
         self.maximize_button.setGeometry(self.width() - 60, 0, 30, self.title_bar_height)
         self.close_button.setGeometry(self.width() - 30, 0, 30, self.title_bar_height)
         self.ui_frame.setGeometry(0, self.title_bar_height, self.width(), self.height() - self.title_bar_height)
+        self.minimize_button.setFixedSize(30, self.title_bar_height)  # Ensure fixed size
+        self.maximize_button.setFixedSize(30, self.title_bar_height)  # Ensure fixed size
+        self.close_button.setFixedSize(30, self.title_bar_height)  # Ensure fixed size
 
+    def mouseReleaseEvent(self, event):
+        self.resizing = False
 
     def start_drag(self, event):
         if event.button() == Qt.LeftButton:
