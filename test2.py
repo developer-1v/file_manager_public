@@ -16,13 +16,13 @@ class CustomVideoPlayer(QMainWindow):
         self.setGeometry(1111, 333, 1920, 1080)
         self.resizing = False  # Add a flag to track resizing
 
-        self.setMouseTracking(True)  # Enable mouse tracking for the main window
+        # self.setMouseTracking(True)  # Enable mouse tracking for the main window
         self.initUI()
         self.show()
 
     def initUI(self):
         self.central_widget = QWidget(self)
-        self.central_widget.setMouseTracking(True)  # Enable mouse tracking for the central widget
+        # self.central_widget.setMouseTracking(True)  # Enable mouse tracking for the central widget
         self.setCentralWidget(self.central_widget)
         self.createGifLabel()
         self.createTitleBar()
@@ -87,12 +87,20 @@ class CustomVideoPlayer(QMainWindow):
         self.close_button.setStyleSheet(button_style)
 
         self.title_bar_layout.addStretch()
+        self.reset_size_position_button = QPushButton('[]',self.title_bar)
+        # self.reset_size_position_button.setIcon(QIcon("path/to/fugue/icons/appropriate_icon.png"))  # Set appropriate icon
+        self.reset_size_position_button.setStyleSheet(button_style)
+
         self.title_bar_layout.addStretch()
         self.title_bar_layout.addWidget(self.title_label)
         self.title_bar_layout.addStretch()
+        self.title_bar_layout.addWidget(self.reset_size_position_button)  # Add half size button
         self.title_bar_layout.addWidget(self.minimize_button)
         self.title_bar_layout.addWidget(self.maximize_button)
         self.title_bar_layout.addWidget(self.close_button)
+
+        self.reset_size_position_button.clicked.connect(self.set_half_size)  # Connect button to function
+
 
         self.minimize_button.clicked.connect(self.showMinimized)
         self.maximize_button.clicked.connect(self.toggleMaximizeRestore)
@@ -209,7 +217,23 @@ class CustomVideoPlayer(QMainWindow):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.resizing = False
+            self.check_snap(event.globalPosition().toPoint())  # Check for snap
             event.accept()
+
+    def check_snap(self, pos):
+        screen = QApplication.primaryScreen()
+        screen_geometry = screen.geometry()
+        margin = 10
+
+        if pos.x() <= margin:  # Snap to left
+            self.setGeometry(screen_geometry.x(), screen_geometry.y(), screen_geometry.width() // 2, screen_geometry.height())
+        elif pos.x() >= screen_geometry.width() - margin:  # Snap to right
+            self.setGeometry(screen_geometry.width() // 2, screen_geometry.y(), screen_geometry.width() // 2, screen_geometry.height())
+        elif pos.y() <= margin:  # Snap to top
+            self.setGeometry(screen_geometry.x(), screen_geometry.y(), screen_geometry.width(), screen_geometry.height() // 2)
+        elif pos.y() >= screen_geometry.height() - margin:  # Snap to bottom
+            self.setGeometry(screen_geometry.x(), screen_geometry.height() // 2, screen_geometry.width(), screen_geometry.height() // 2)
+
 
 
 
@@ -244,6 +268,16 @@ class CustomVideoPlayer(QMainWindow):
     def on_edge_leave(self, event):
         self.setCursor(Qt.ArrowCursor)
 
+    def set_half_size(self):
+        screen = QApplication.primaryScreen()
+        screen_geometry = screen.geometry()
+        new_width = screen_geometry.width() // 2
+        new_height = screen_geometry.height() // 2
+        new_x = (screen_geometry.width() - new_width) // 2
+        new_y = (screen_geometry.height() - new_height) // 2
+        self.setGeometry(new_x, new_y, new_width, new_height)
+
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
         button_size = int(self.width() * self.button_size_percentage)
@@ -251,6 +285,7 @@ class CustomVideoPlayer(QMainWindow):
         
         self.title_bar.setGeometry(0, 0, self.width(), self.title_bar_height)
         self.title_label.setGeometry(self.width() // 2 - 100, 0, 200, self.title_bar_height)
+        self.reset_size_position_button.setGeometry(self.width() - 4 * (button_size + button_spacing), 0, button_size, self.title_bar_height)  # Adjust position
         self.minimize_button.setGeometry(self.width() - 3 * (button_size + button_spacing), 0, button_size, self.title_bar_height)
         self.maximize_button.setGeometry(self.width() - 2 * (button_size + button_spacing), 0, button_size, self.title_bar_height)
         self.close_button.setGeometry(self.width() - (button_size), 0, button_size, self.title_bar_height)
