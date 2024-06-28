@@ -87,13 +87,7 @@ class Organizationally(QMainWindow):
         self.title_bar_layout.addWidget(self.maximize_button)
         self.title_bar_layout.addWidget(self.close_button)
 
-        self.reset_size_position_button.clicked.connect(self.reset_size_to_half_and_center)  # Connect button to function
-        self.minimize_button.clicked.connect(self.showMinimized)
-        self.maximize_button.clicked.connect(self.toggle_maximize_restore)
-        self.close_button.clicked.connect(self.close)
 
-        self.title_bar.mousePressEvent = self.start_drag
-        self.title_bar.mouseMoveEvent = self.do_drag
 
 ## TODO DELETE
     def createAdditionalUI(self): ## TODO DELETE
@@ -110,6 +104,38 @@ class Organizationally(QMainWindow):
         self.file_model = QFileSystemModel()
         self.file_model.setRootPath('')
         self.file_tree.setModel(self.file_model)
+
+
+    def create_edge_buttons(self):
+        margin = 10
+
+        self.left_edge_button = QPushButton(self)
+        self.left_edge_button.setGeometry(0, 0, margin, self.height())
+        self.left_edge_button.setStyleSheet("background: transparent;")
+        self.left_edge_button.setMouseTracking(True)
+
+        self.right_edge_button = QPushButton(self)
+        self.right_edge_button.setGeometry(self.width() - margin, 0, margin, self.height())
+        self.right_edge_button.setStyleSheet("background: transparent;")
+        self.right_edge_button.setMouseTracking(True)
+
+        self.bottom_edge_button = QPushButton(self)
+        self.bottom_edge_button.setGeometry(0, self.height() - margin, self.width(), margin)
+        self.bottom_edge_button.setStyleSheet("background: transparent;")
+        self.bottom_edge_button.setMouseTracking(True)
+
+
+
+if __name__ == "__main__":
+    app = QApplication([])
+    player = Organizationally()  # Updated class name
+    sys.exit(app.exec())
+    
+
+
+'''
+
+
 
 
 
@@ -151,40 +177,8 @@ class Organizationally(QMainWindow):
 
             self.setGeometry(new_x, new_y, new_width, new_height)
             self.drag_position = event.globalPosition().toPoint()
-
-    def create_edge_buttons(self):
-        margin = 10
-
-        self.left_edge_button = QPushButton(self)
-        self.left_edge_button.setGeometry(0, 0, margin, self.height())
-        self.left_edge_button.setStyleSheet("background: transparent;")
-        self.left_edge_button.setMouseTracking(True)
-        self.left_edge_button.enterEvent = self.on_edge_enter
-        self.left_edge_button.leaveEvent = self.on_edge_leave
-        self.left_edge_button.mousePressEvent = self.start_resize  # Ensure drag_position is set
-        self.left_edge_button.mouseMoveEvent = self.do_resize
-        self.left_edge_button.mouseReleaseEvent = self.stop_resize
-
-        self.right_edge_button = QPushButton(self)
-        self.right_edge_button.setGeometry(self.width() - margin, 0, margin, self.height())
-        self.right_edge_button.setStyleSheet("background: transparent;")
-        self.right_edge_button.setMouseTracking(True)
-        self.right_edge_button.enterEvent = self.on_edge_enter
-        self.right_edge_button.leaveEvent = self.on_edge_leave
-        self.right_edge_button.mousePressEvent = self.start_resize  # Ensure drag_position is set
-        self.right_edge_button.mouseMoveEvent = self.do_resize
-        self.right_edge_button.mouseReleaseEvent = self.stop_resize
-
-        self.bottom_edge_button = QPushButton(self)
-        self.bottom_edge_button.setGeometry(0, self.height() - margin, self.width(), margin)
-        self.bottom_edge_button.setStyleSheet("background: transparent;")
-        self.bottom_edge_button.setMouseTracking(True)
-        self.bottom_edge_button.enterEvent = self.on_edge_enter
-        self.bottom_edge_button.leaveEvent = self.on_edge_leave
-        self.bottom_edge_button.mousePressEvent = self.start_resize  # Ensure drag_position is set
-        self.bottom_edge_button.mouseMoveEvent = self.do_resize
-        self.bottom_edge_button.mouseReleaseEvent = self.stop_resize
-
+            
+            
     def start_resize(self, event):
         if event.button() == Qt.LeftButton:
             self.drag_position = event.globalPosition().toPoint()
@@ -269,8 +263,6 @@ class Organizationally(QMainWindow):
             self.showNormal()
         else:
             self.showMaximized()
-
-if __name__ == "__main__":
-    app = QApplication([])
-    player = Organizationally()  # Updated class name
-    sys.exit(app.exec())
+            
+            
+            '''
