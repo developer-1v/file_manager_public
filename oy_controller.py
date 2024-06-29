@@ -1,44 +1,38 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication
 from oy_model import OrganizationallyModel
-from oy_view import OrganizationallyView
+from oy_view import OrganizationallyView, OrganizationallyViewEvents
 
 class OrganizationallyController:
     def __init__(self):
         self.model = OrganizationallyModel()
         self.view = OrganizationallyView()
+        self.events = OrganizationallyViewEvents(self.view)
 
-        self.view.reset_size_position_button.clicked.connect(self.reset_size_to_half_and_center)
+        self.view.reset_size_position_button.clicked.connect(self.events.reset_size_to_half_and_center)
         self.view.minimize_button.clicked.connect(self.view.showMinimized)
-        self.view.maximize_button.clicked.connect(self.toggle_maximize_restore)
+        self.view.maximize_button.clicked.connect(self.events.toggle_maximize_restore)
         self.view.close_button.clicked.connect(self.view.close)
 
-        self.view.title_bar.mousePressEvent = self.start_drag
-        self.view.title_bar.mouseMoveEvent = self.do_drag
+        self.view.title_bar.mousePressEvent = self.events.start_drag
+        self.view.title_bar.mouseMoveEvent = self.events.do_drag
 
-    def start_drag(self, event):
-        if event.button() == Qt.LeftButton:
-            self.drag_position = event.globalPosition().toPoint() - self.view.frameGeometry().topLeft()
-            event.accept()
+        # Connect edge buttons to resize events and change cursor
+        self.view.left_edge_button.setCursor(Qt.SizeHorCursor)
+        self.view.left_edge_button.mousePressEvent = self.events.start_resize
+        self.view.left_edge_button.mouseMoveEvent = self.events.do_resize
+        self.view.left_edge_button.mouseReleaseEvent = self.events.stop_resize
 
-    def do_drag(self, event):
-        if event.buttons() == Qt.LeftButton:
-            self.view.move(event.globalPosition().toPoint() - self.drag_position)
-            event.accept()
+        self.view.right_edge_button.setCursor(Qt.SizeHorCursor)
+        self.view.right_edge_button.mousePressEvent = self.events.start_resize
+        self.view.right_edge_button.mouseMoveEvent = self.events.do_resize
+        self.view.right_edge_button.mouseReleaseEvent = self.events.stop_resize
 
-    def reset_size_to_half_and_center(self):
-        screen_geometry = QApplication.primaryScreen().geometry()
-        new_width = screen_geometry.width() // 2
-        new_height = screen_geometry.height() // 2
-        new_x = (screen_geometry.width() - new_width) // 2
-        new_y = (screen_geometry.height() - new_height) // 2
-        self.view.setGeometry(new_x, new_y, new_width, new_height)
+        self.view.bottom_edge_button.setCursor(Qt.SizeVerCursor)
+        self.view.bottom_edge_button.mousePressEvent = self.events.start_resize
+        self.view.bottom_edge_button.mouseMoveEvent = self.events.do_resize
+        self.view.bottom_edge_button.mouseReleaseEvent = self.events.stop_resize
 
-    def toggle_maximize_restore(self):
-        if self.view.isMaximized():
-            self.view.showNormal()
-        else:
-            self.view.showMaximized()
 
 if __name__ == "__main__":
     app = QApplication([])
