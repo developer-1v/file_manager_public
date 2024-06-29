@@ -25,6 +25,15 @@ from frame_areas.Status import Status
 from frame_areas.Properties import Properties
 from frame_areas.TreeView import TreeView
 
+class ZArea(QFrame):
+    def __init__(self, parent, color="red"):
+        super().__init__(parent)
+        self.setStyleSheet(
+            f"background: rgba({color});"
+            )
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+
 class OrganizationallyView(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -57,7 +66,7 @@ class OrganizationallyView(QMainWindow):
         self.create_title_bar()
         self.create_edge_buttons()
         self.create_ui_frame()
-        self.createAdditionalUI()
+        # self.createAdditionalUI()
         self.create_layouts()
 
     def create_layouts(self):
@@ -68,17 +77,31 @@ class OrganizationallyView(QMainWindow):
         self.ui_layout = QVBoxLayout()
         self.ui_layout.setContentsMargins(0, 0, 0, 0)
         self.ui_layout.setSpacing(self.spacing_between_widgets)
-        self.ui_layout.addWidget(self.label1)
-        self.ui_layout.addWidget(self.input1)
-        self.ui_layout.addWidget(self.label2)
-        self.ui_layout.addWidget(self.input2)
-        self.ui_layout.addWidget(self.file_tree)
+        # self.ui_layout.addWidget(self.label1)
+        # self.ui_layout.addWidget(self.input1)
+        # self.ui_layout.addWidget(self.label2)
+        # self.ui_layout.addWidget(self.input2)
+        # self.ui_layout.addWidget(self.file_tree)
         
         self.ui_frame.setLayout(self.ui_layout)
 
     def create_ui_frame(self):
         self.ui_frame = QFrame(self.central_widget)
         self.ui_frame.setStyleSheet(self.ui_frame_style)
+        self.create_z_areas()
+
+    def create_z_areas(self):
+        self.z_area_center = ZArea(self.ui_frame, color="255, 0, 0, .5")
+        self.z_area_left_right = ZArea(self.ui_frame, color="0, 255, 0, .5")
+        self.z_area_top_bot = ZArea(self.ui_frame, color="0, 0, 255, .5")
+
+        self.z_area_center.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
+        self.z_area_left_right.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
+        self.z_area_top_bot.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
+
+        self.z_area_center.raise_()
+        self.z_area_left_right.raise_()
+        self.z_area_top_bot.raise_()
 
 
     def create_central_widget(self):
@@ -161,7 +184,7 @@ class OrganizationallyView(QMainWindow):
         super().resizeEvent(event)
         self.update_sizes()
 
-    def update_sizes(self):
+    def update_sizes(self, debug=True):
         button_size = int(self.width() * self.button_size_percentage)
         button_spacing = int(self.width() * self.button_spacing_percentage)
         
@@ -200,6 +223,16 @@ class OrganizationallyView(QMainWindow):
             self.width() - self.border_size*2, 
             self.height() - self.title_bar_height - self.border_size*2
         )
+        self.z_area_center.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
+        self.z_area_left_right.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
+        self.z_area_top_bot.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
+        
+        if debug:
+            self.z_area_center.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
+            self.z_area_left_right.setGeometry(55, 55, self.ui_frame.width(), self.ui_frame.height())
+            self.z_area_top_bot.setGeometry(111, 111, self.ui_frame.width(), self.ui_frame.height())
+
+        # ... existing code ...
         
         
         ## EDGE AREAS
@@ -213,24 +246,24 @@ class OrganizationallyView(QMainWindow):
         self.right_bottom_corner_button.setGeometry(self.width() - self.grabbing_edge_size*corner_multiplier, self.height() - self.grabbing_edge_size*corner_multiplier, self.grabbing_edge_size*corner_multiplier, self.grabbing_edge_size*corner_multiplier)
 
 
-## TODO DELETE
-    def createAdditionalUI(self): ## TODO DELETE
-        self.label1 = QLabel("Label 1", self)
-        self.label1.setStyleSheet(self.default_widget_style)
-        self.label2 = QLabel("Label 2", self)
-        self.label2.setStyleSheet(self.default_widget_style)
-        self.input1 = QLineEdit(self)
-        self.input1.setStyleSheet(self.default_widget_style)
-        self.input2 = QLineEdit(self)
-        self.input2.setStyleSheet(self.default_widget_style)
+# ## TODO DELETE
+#     def createAdditionalUI(self): ## TODO DELETE
+#         self.label1 = QLabel("Label 1", self)
+#         self.label1.setStyleSheet(self.default_widget_style)
+#         self.label2 = QLabel("Label 2", self)
+#         self.label2.setStyleSheet(self.default_widget_style)
+#         self.input1 = QLineEdit(self)
+#         self.input1.setStyleSheet(self.default_widget_style)
+#         self.input2 = QLineEdit(self)
+#         self.input2.setStyleSheet(self.default_widget_style)
         
         
         
-        self.file_tree = QTreeView(self)
-        self.file_tree.setStyleSheet(self.default_widget_style)
-        self.file_model = QFileSystemModel()
-        self.file_model.setRootPath('')
-        self.file_tree.setModel(self.file_model)
+#         self.file_tree = QTreeView(self)
+#         self.file_tree.setStyleSheet(self.default_widget_style)
+#         self.file_model = QFileSystemModel()
+#         self.file_model.setRootPath('')
+#         self.file_tree.setModel(self.file_model)
 
 
 
