@@ -46,9 +46,25 @@ class ZAreas:
         self.z_area_center = ZArea(parent)
         self.z_area_top_bot = ZArea(parent)
         self.z_area_left_right = ZArea(parent)
-        
         self.z_area_top = ZArea(self.z_area_top_bot, style=self.style)
         self.z_area_bottom = ZArea(self.z_area_top_bot, style=self.style)
+        self.z_area_left = ZArea(self.z_area_left_right, style=self.style)
+        self.z_area_right = ZArea(self.z_area_left_right, style=self.style)
+        # Add widgets to left area
+        self.org_access = OrgAccess(self.z_area_left)
+        self.org_sub_access = OrgSubAccess(self.z_area_left)
+        left_layout = QHBoxLayout(self.z_area_left)
+        left_layout.addWidget(self.org_access)
+        left_layout.addWidget(self.org_sub_access)
+        self.z_area_left.setLayout(left_layout)
+        # Add widgets to right area
+        self.ai_area = AIArea(self.z_area_right)
+        self.search_area = SearchArea(self.z_area_right)
+        right_layout = QHBoxLayout(self.z_area_right)
+        right_layout.addWidget(self.ai_area)
+        right_layout.addWidget(self.search_area)
+        self.z_area_right.setLayout(right_layout)
+        
 
         self.update_geometries(parent.width(), parent.height())
         self.raise_areas()
@@ -77,13 +93,20 @@ class ZAreas:
     def update_geometries(self, width, height, debug=False):
         top_height = int(height * self.top_height_ratio)
         bottom_height = int(height * self.bottom_height_ratio)
+        side_width = int(width * 0.15)
+        widget_height = int(height * 0.07)
         self.z_area_center.setGeometry(0, 0, width, height)
         self.z_area_left_right.setGeometry(0, 0, width, height)
         self.z_area_top_bot.setGeometry(0, 0, width, height)
         self.z_area_top.setGeometry(0, 0, width, top_height)
         self.z_area_bottom.setGeometry(0, height - bottom_height, width, bottom_height)
+        self.z_area_left.setGeometry(0, top_height, side_width, height - top_height - bottom_height)
+        self.z_area_right.setGeometry(width - side_width, top_height, side_width, height - top_height - bottom_height)
+        self.org_access.setFixedHeight(widget_height)
+        self.org_sub_access.setFixedHeight(widget_height)
+        self.ai_area.setFixedHeight(widget_height)
+        self.search_area.setFixedHeight(widget_height)
         if debug:
-            ## Set colors to red, green, blue
             self.z_area_center.setStyleSheet("background: red;")
             self.z_area_left_right.setStyleSheet("background: green;")
             self.z_area_top_bot.setStyleSheet("background: blue;")

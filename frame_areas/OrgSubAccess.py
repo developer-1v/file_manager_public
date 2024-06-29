@@ -2,8 +2,8 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
 from PySide6.QtCore import Qt
 
 class OrgSubAccess(QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent, style="Background: transparent;"):
+        super().__init__(parent)
         self.name = "Organizational Sub Access"
         self.initUI()
 

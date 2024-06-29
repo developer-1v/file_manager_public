@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
 from PySide6.QtCore import Qt
 
 class TopFrame3(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent, style="Background: transparent;"):
         super().__init__(parent)
         self.name = "Top Frame 3"
         self.initUI()
