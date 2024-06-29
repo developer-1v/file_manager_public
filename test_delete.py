@@ -14,6 +14,8 @@ class Organizationally(QMainWindow):
         self.title_bar_height = 30
         self.button_size_percentage = 0.075  # Button size as a percentage of window width
         self.button_spacing_percentage = 0.01  # Spacing as a percentage of window width
+        self.border_size = 10
+        self.grabbing_edge_size = 10
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setGeometry(1111, 333, 1920, 1080)
         self.resizing = False  # Add a flag to track resizing
@@ -28,11 +30,11 @@ class Organizationally(QMainWindow):
         self.create_title_bar()
         self.createAdditionalUI()
         self.createFileTreeView()
-        self.create_edge_buttons()  # Create edge buttons
+        self.create_edge_buttons()
         self.create_layouts()
 
     def create_layouts(self):
-        main_layout = QVBoxLayout(self.central_widget)  # Set layout on central widget
+        main_layout = QVBoxLayout(self.central_widget)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.addWidget(self.gif_label)
 
@@ -43,19 +45,18 @@ class Organizationally(QMainWindow):
         ui_layout.addWidget(self.input2)
         ui_layout.addWidget(self.file_tree)
 
-        self.ui_frame = QFrame(self.gif_label)
+        self.ui_frame = QFrame(self.central_widget)
         self.ui_frame.setLayout(ui_layout)
         self.ui_frame.setStyleSheet("background: rgba(222, 222, 222, 0.7); color: #D8DEE9;")
-        # self.ui_frame.setGeometry(0, self.title_bar_height, 111, self.height() - self.title_bar_height + 550)
 
     def create_gif_background(self):
-        self.gif_label = QLabel(self)
+        self.gif_label = QLabel(self.central_widget)
         self.movie = QMovie("assets/backgrounds/lightspeed-10957.gif")
         self.gif_label.setMovie(self.movie)
         self.movie.start()
         self.gif_label.setScaledContents(True)
         self.gif_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-
+        
     def create_title_bar(self):
         self.title_bar = QFrame(self)
         self.title_bar.setStyleSheet("background: rgba(55, 55, 55, 0.8); color: #D8DEE9;")
@@ -124,6 +125,51 @@ class Organizationally(QMainWindow):
         self.bottom_edge_button.setStyleSheet("background: transparent;")
         self.bottom_edge_button.setMouseTracking(True)
 
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        button_size = int(self.width() * self.button_size_percentage)
+        button_spacing = int(self.width() * self.button_spacing_percentage)
+        
+        
+        ## TITLE BAR AREA
+        
+        ## Key setGeometry(x, y, width, height) - setGeometry Key
+        self.title_bar.setGeometry(
+            self.border_size, 
+            0, 
+            self.width() - self.border_size*2, 
+            self.title_bar_height
+        )
+        self.title_label.setGeometry(self.width() // 2 - 100, 0, 200, self.title_bar_height)
+        
+        self.reset_size_position_button.setGeometry(self.width() - 4 * (button_size + button_spacing), 0, button_size, self.title_bar_height)  # Adjust position
+        self.reset_size_position_button.setFixedSize(button_size, self.title_bar_height)
+        
+        self.minimize_button.setGeometry(self.width() - 3 * (button_size + button_spacing), 0, button_size, self.title_bar_height)
+        self.minimize_button.setFixedSize(button_size, self.title_bar_height)
+        
+        self.maximize_button.setGeometry(self.width() - 2 * (button_size + button_spacing), 0, button_size, self.title_bar_height)
+        self.maximize_button.setFixedSize(button_size, self.title_bar_height)
+        
+        self.close_button.setGeometry(self.width() - (button_size), 0, button_size, self.title_bar_height)
+        self.close_button.setFixedSize(button_size, self.title_bar_height)
+        
+        
+        ## UI AREA
+        
+        self.ui_frame.setGeometry(
+            self.border_size,
+            self.title_bar_height,
+            self.width() - self.border_size*2, 
+            self.height() - self.title_bar_height - self.border_size
+        )
+        
+        
+        ## EDGE AREAS
+        
+        self.left_edge_button.setGeometry(0, 0, self.grabbing_edge_size, self.height())
+        self.right_edge_button.setGeometry(self.width() - self.grabbing_edge_size, 0, self.grabbing_edge_size, self.height())
+        self.bottom_edge_button.setGeometry(0, self.height() - self.grabbing_edge_size, self.width(), self.grabbing_edge_size)
 
 
 if __name__ == "__main__":
