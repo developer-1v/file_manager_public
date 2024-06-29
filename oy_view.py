@@ -7,8 +7,9 @@ Your organization ally for files, projects, research, and more!
 from print_tricks import pt
 
 import sys
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QMovie
+from PySide6.QtCore import Qt, QObject
+from PySide6.QtCore import QEvent
+from PySide6.QtGui import QMovie, QCursor
 from PySide6.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout, QHBoxLayout, QLineEdit, QTreeView, QFrame, QFileSystemModel, QSizePolicy, QPushButton
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout
 
@@ -30,46 +31,89 @@ class ZArea(QFrame):
         super().__init__(parent)
         self.setStyleSheet(style)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        
+
+
+
+class ZAreasEvents(QObject):
+    def __init__(self, z_areas):
+        super().__init__()
+        self.z_areas = z_areas
+        self.z_areas.z_area_left.installEventFilter(self)
+
+    def eventFilter(self, obj, event):
+        if obj == self.z_areas.z_area_left:
+            if event.type() == QEvent.Enter:
+                self.expand_left_area()
+            elif event.type() == QEvent.Leave:
+                self.retract_left_area()
+        return super().eventFilter(obj, event)
+
+    def expand_left_area(self):
+        if not self.z_areas.is_left_expanded:
+            self.z_areas.is_left_expanded = True
+            self.z_areas.z_area_left.setGeometry(0, self.z_areas.z_area_top.height(), int(self.z_areas.z_area_left_right.width() * self.z_areas.expanded_side_areas_width_ratio), self.z_areas.z_area_left_right.height() - self.z_areas.z_area_top.height() - self.z_areas.z_area_bottom.height())
+
+    def retract_left_area(self):
+        if self.z_areas.is_left_expanded:
+            self.z_areas.is_left_expanded = False
+            self.z_areas.z_area_left.setGeometry(0, self.z_areas.z_area_top.height(), int(self.z_areas.z_area_left_right.width() * self.z_areas.side_areas_width_ratio), self.z_areas.z_area_left_right.height() - self.z_areas.z_area_top.height() - self.z_areas.z_area_bottom.height())
+
+
 class ZAreas:
     def __init__(self, 
             parent, 
             top_height_ratio=0.135, 
             bottom_height_ratio=0.045, 
+            side_areas_width_ratio=0.03,  # Initial left width ratio
+            expanded_side_areas_width_ratio=0.15,  # Expanded left width ratio
             spacing=1, 
             style="rgba(55, 55, 55, 0.8)"):
         self.top_height_ratio = top_height_ratio
         self.bottom_height_ratio = bottom_height_ratio
+        self.side_areas_width_ratio = side_areas_width_ratio
+        self.expanded_side_areas_width_ratio = expanded_side_areas_width_ratio
         self.spacing = spacing
         self.style = style
+        self.is_left_expanded = False
 
+        self.init_main_areas(parent)
+        self.add_widgets_to_areas()
+        self.update_geometries(parent.width(), parent.height())
+        self.raise_areas()
+
+    def init_main_areas(self, parent):
         self.z_area_center = ZArea(parent)
         self.z_area_top_bot = ZArea(parent)
         self.z_area_left_right = ZArea(parent)
         self.z_area_top = ZArea(self.z_area_top_bot, style=self.style)
         self.z_area_bottom = ZArea(self.z_area_top_bot, style=self.style)
         self.z_area_left = ZArea(self.z_area_left_right, style=self.style)
+        self.z_area_left.setGeometry(0, 0, int(parent.width() * self.side_areas_width_ratio), parent.height())
         self.z_area_right = ZArea(self.z_area_left_right, style=self.style)
-        # Add widgets to left area
+
+    def add_widgets_to_areas(self):
+        self.add_widgets_to_left_area()
+        self.add_widgets_to_right_area()
+        self.add_widgets_to_top_area()
+        self.add_widgets_to_bottom_area()
+
+    def add_widgets_to_left_area(self):
         self.org_access = OrgAccess(self.z_area_left)
         self.org_sub_access = OrgSubAccess(self.z_area_left)
         left_layout = QHBoxLayout(self.z_area_left)
         left_layout.addWidget(self.org_access)
         left_layout.addWidget(self.org_sub_access)
         self.z_area_left.setLayout(left_layout)
-        # Add widgets to right area
+
+    def add_widgets_to_right_area(self):
         self.ai_area = AIArea(self.z_area_right)
         self.search_area = SearchArea(self.z_area_right)
         right_layout = QHBoxLayout(self.z_area_right)
         right_layout.addWidget(self.ai_area)
         right_layout.addWidget(self.search_area)
         self.z_area_right.setLayout(right_layout)
-        
 
-        self.update_geometries(parent.width(), parent.height())
-        self.raise_areas()
-
-        # Add widgets to top area
+    def add_widgets_to_top_area(self):
         self.command_bar = CommandBar(self.z_area_top)
         self.top_frame3 = TopFrame3(self.z_area_top)
         self.top_frame4 = TopFrame4(self.z_area_top)
@@ -80,7 +124,7 @@ class ZAreas:
         top_layout.addWidget(self.top_frame4)
         self.z_area_top.setLayout(top_layout)
 
-        # Add widgets to bottom area
+    def add_widgets_to_bottom_area(self):
         self.status = Status(self.z_area_bottom)
         self.properties = Properties(self.z_area_bottom)
         self.tree_view = TreeView(self.z_area_bottom)
@@ -147,6 +191,8 @@ class OrganizationallyView(QMainWindow):
         
         self.init_ui()
         self.z_areas = ZAreas(self.ui_frame, style=self.theme_menu_style)
+        self.z_areas_events = ZAreasEvents(self.z_areas)
+
         self.events = OrganizationallyViewEvents(self)
         self.show()
 
