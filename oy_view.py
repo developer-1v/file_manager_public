@@ -228,11 +228,11 @@ class OrganizationallyView(QMainWindow):
         self.z_area_top_bot.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
         
         if debug:
+            ## Debugging the Z- layers to see if they are in the correct z order. 
             self.z_area_center.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
             self.z_area_left_right.setGeometry(55, 55, self.ui_frame.width(), self.ui_frame.height())
             self.z_area_top_bot.setGeometry(111, 111, self.ui_frame.width(), self.ui_frame.height())
 
-        # ... existing code ...
         
         
         ## EDGE AREAS
