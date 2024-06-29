@@ -76,6 +76,11 @@ class OrganizationallyView(QMainWindow):
         
         self.ui_frame.setLayout(self.ui_layout)
 
+    def create_ui_frame(self):
+        self.ui_frame = QFrame(self.central_widget)
+        self.ui_frame.setStyleSheet(self.ui_frame_style)
+
+
     def create_central_widget(self):
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
@@ -151,9 +156,6 @@ class OrganizationallyView(QMainWindow):
             self.left_bottom_corner_button.setStyleSheet('background: rgba(0, 0, 255, 1);')
             self.right_bottom_corner_button.setStyleSheet('background: rgba(0, 0, 255, 1);')
 
-    def create_ui_frame(self):
-        self.ui_frame = QFrame(self.central_widget)
-        self.ui_frame.setStyleSheet(self.ui_frame_style)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
