@@ -51,45 +51,82 @@ class ZAreasEvents(QObject):
     def expand_left_area(self):
         if not self.z_areas.is_left_expanded:
             self.z_areas.is_left_expanded = True
-            self.z_areas.z_area_left.setGeometry(0, self.z_areas.z_area_top.height(), int(self.z_areas.z_area_left_right.width() * self.z_areas.expanded_side_areas_width_ratio), self.z_areas.z_area_left_right.height() - self.z_areas.z_area_top.height() - self.z_areas.z_area_bottom.height())
+            bottom_height = self.z_areas.z_area_bottom.height()
+            self.z_areas.z_area_left.setGeometry(
+                0, 
+                0, 
+                int(self.z_areas.parent.width() * self.z_areas.expanded_side_areas_width_ratio), 
+                self.z_areas.parent.height() - bottom_height)  # Use bottom area's height
 
     def retract_left_area(self):
         if self.z_areas.is_left_expanded:
             self.z_areas.is_left_expanded = False
-            self.z_areas.z_area_left.setGeometry(0, self.z_areas.z_area_top.height(), int(self.z_areas.z_area_left_right.width() * self.z_areas.side_areas_width_ratio), self.z_areas.z_area_left_right.height() - self.z_areas.z_area_top.height() - self.z_areas.z_area_bottom.height())
-
+            bottom_height = self.z_areas.z_area_bottom.height()
+            self.z_areas.z_area_left.setGeometry(
+                0, 
+                0, 
+                int(self.z_areas.parent.width() * self.z_areas.side_areas_width_ratio),
+                self.z_areas.parent.height() - bottom_height)  # Use bottom area's height
 
 class ZAreas:
     def __init__(self, 
             parent, 
-            top_height_ratio=0.135, 
             bottom_height_ratio=0.045, 
+            top_height_ratio=None,
             side_areas_width_ratio=0.03,  # Initial left width ratio
             expanded_side_areas_width_ratio=0.15,  # Expanded left width ratio
             spacing=1, 
             style="rgba(55, 55, 55, 0.8)"):
-        self.top_height_ratio = top_height_ratio
+        self.parent = parent
         self.bottom_height_ratio = bottom_height_ratio
+        self.top_height_ratio = top_height_ratio if top_height_ratio is not None else bottom_height_ratio * 3
         self.side_areas_width_ratio = side_areas_width_ratio
         self.expanded_side_areas_width_ratio = expanded_side_areas_width_ratio
         self.spacing = spacing
         self.style = style
         self.is_left_expanded = False
+        
 
+        
+        pt(top_height_ratio, bottom_height_ratio, side_areas_width_ratio, expanded_side_areas_width_ratio, spacing, style)
+        # pt(self.width)
         self.init_main_areas(parent)
         self.add_widgets_to_areas()
         self.update_geometries(parent.width(), parent.height())
         self.raise_areas()
 
     def init_main_areas(self, parent):
-        self.z_area_center = ZArea(parent)
-        self.z_area_top_bot = ZArea(parent)
-        self.z_area_left_right = ZArea(parent)
-        self.z_area_top = ZArea(self.z_area_top_bot, style=self.style)
-        self.z_area_bottom = ZArea(self.z_area_top_bot, style=self.style)
-        self.z_area_left = ZArea(self.z_area_left_right, style=self.style)
-        self.z_area_left.setGeometry(0, 0, int(parent.width() * self.side_areas_width_ratio), parent.height())
-        self.z_area_right = ZArea(self.z_area_left_right, style=self.style)
+        self.z_area_center_container = ZArea(parent)
+        self.z_area_left = ZArea(self.z_area_center_container, style=self.style)
+        self.z_area_middle = ZArea(self.z_area_center_container, style=self.style)
+        self.z_area_right = ZArea(self.z_area_center_container, style=self.style)
+        
+        self.z_area_top = ZArea(parent, style=self.style)
+        self.z_area_bottom = ZArea(parent, style=self.style)
+
+    def update_geometries(self, width, height, debug=True):
+        top_height = int(height * self.top_height_ratio)
+        bottom_height = int(height * self.bottom_height_ratio)
+        side_width = int(width * self.side_areas_width_ratio)
+        widget_height = int(height * 0.07)
+        
+        self.z_area_center_container.setGeometry(0, 0, width, height)
+        self.z_area_left.setGeometry(0, 0, side_width, height - bottom_height)
+        self.z_area_middle.setGeometry(side_width, 0, width - 2 * side_width, height - bottom_height)
+        self.z_area_right.setGeometry(width - side_width, 0, side_width, height - bottom_height)
+        pt(height, height, self.z_area_left.height(), self.z_area_middle.height(), self.z_area_right.height())
+        
+        self.z_area_top.setGeometry(0, 0, width, top_height)
+        self.z_area_bottom.setGeometry(0, height - bottom_height, width, bottom_height)
+        
+        self.org_access.setFixedHeight(widget_height)
+        self.org_sub_access.setFixedHeight(widget_height)
+        self.ai_area.setFixedHeight(widget_height)
+        self.search_area.setFixedHeight(widget_height)
+        if debug:
+            self.z_area_middle.setStyleSheet("background: red;")
+            self.z_area_left.setStyleSheet("background: green;")
+            self.z_area_right.setStyleSheet("background: blue;")
 
     def add_widgets_to_areas(self):
         self.add_widgets_to_left_area()
@@ -134,35 +171,13 @@ class ZAreas:
         bottom_layout.addWidget(self.tree_view)
         self.z_area_bottom.setLayout(bottom_layout)
 
-    def update_geometries(self, width, height, debug=False):
-        top_height = int(height * self.top_height_ratio)
-        bottom_height = int(height * self.bottom_height_ratio)
-        side_width = int(width * 0.15)
-        widget_height = int(height * 0.07)
-        self.z_area_center.setGeometry(0, 0, width, height)
-        self.z_area_left_right.setGeometry(0, 0, width, height)
-        self.z_area_top_bot.setGeometry(0, 0, width, height)
-        self.z_area_top.setGeometry(0, 0, width, top_height)
-        self.z_area_bottom.setGeometry(0, height - bottom_height, width, bottom_height)
-        self.z_area_left.setGeometry(0, top_height, side_width, height - top_height - bottom_height)
-        self.z_area_right.setGeometry(width - side_width, top_height, side_width, height - top_height - bottom_height)
-        self.org_access.setFixedHeight(widget_height)
-        self.org_sub_access.setFixedHeight(widget_height)
-        self.ai_area.setFixedHeight(widget_height)
-        self.search_area.setFixedHeight(widget_height)
-        if debug:
-            self.z_area_center.setStyleSheet("background: red;")
-            self.z_area_left_right.setStyleSheet("background: green;")
-            self.z_area_top_bot.setStyleSheet("background: blue;")
-            self.z_area_left_right.setGeometry(5, 5, width, height)
-            self.z_area_top_bot.setGeometry(11, 11, width, height)
-
     def raise_areas(self):
-        self.z_area_center.raise_()
-        self.z_area_left_right.raise_()
-        self.z_area_top_bot.raise_()
-        self.z_area_top.raise_()
+        self.z_area_center_container.raise_()
+        self.z_area_middle.raise_()
+        self.z_area_left.raise_()
+        self.z_area_right.raise_()
         self.z_area_bottom.raise_()
+        self.z_area_top.raise_()
 
 
 class OrganizationallyView(QMainWindow):
@@ -220,9 +235,6 @@ class OrganizationallyView(QMainWindow):
         self.ui_frame = QFrame(self.central_widget)
         self.ui_frame.setStyleSheet(self.ui_frame_style)
         # self.create_z_areas()
-
-
-
 
     def create_central_widget(self):
         self.central_widget = QWidget(self)
