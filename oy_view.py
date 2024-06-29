@@ -22,34 +22,34 @@ class OrganizationallyView(QMainWindow):
         self.grabbing_edge_size = 10
         self.spacing_between_widgets = 10
         self.edge_margin = 10
-
+        
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setGeometry(1111, 333, 1920, 1080)
         self.resizing = False
-
+        
         self.title_bar_style = "background: rgba(55, 55, 55, 0.8); color: #D8DEE9;"
         self.ui_frame_style = "background: transparent;"
         self.edge_button_style = "background: transparent;"
         self.default_widget_style = "background: rgba(33, 33, 33, 0.999); color: #D8DEE9;"
-
+        
+        self.bg_movie_speed = 33
+        
         self.init_ui()
         self.show()
 
     def init_ui(self):
         self.create_central_widget()
-        self.create_gif_background()
+        self.create_movie_background()
         self.create_title_bar()
         self.create_edge_buttons()
         self.create_ui_frame()
         self.createAdditionalUI()
         self.create_layouts()
 
-
-
     def create_layouts(self):
         main_layout = QVBoxLayout(self.central_widget)
         main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.addWidget(self.gif_label)
+        main_layout.addWidget(self.movie_label)
         
         self.ui_layout = QVBoxLayout()
         self.ui_layout.setContentsMargins(0, 0, 0, 0)
@@ -66,13 +66,14 @@ class OrganizationallyView(QMainWindow):
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
 
-    def create_gif_background(self):
-        self.gif_label = QLabel(self.central_widget)
-        self.movie = QMovie("assets/backgrounds/lightspeed-10957.gif")
-        self.gif_label.setMovie(self.movie)
+    def create_movie_background(self):
+        self.movie_label = QLabel(self.central_widget)
+        self.movie = QMovie("assets/backgrounds/lightspeed-10957.mp4")
+        self.movie.setSpeed(self.bg_movie_speed)
+        self.movie_label.setMovie(self.movie)
         self.movie.start()
-        self.gif_label.setScaledContents(True)
-        self.gif_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.movie_label.setScaledContents(True)
+        self.movie_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
 
     def create_title_bar(self):
         self.title_bar = QFrame(self)
