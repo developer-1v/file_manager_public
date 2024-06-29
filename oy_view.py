@@ -34,13 +34,16 @@ class ZArea(QFrame):
 
 
 
+
 class ZAreasEvents(QObject):
     def __init__(self, z_areas):
         super().__init__()
         self.z_areas = z_areas
         self.z_areas.z_area_left.installEventFilter(self)
         self.z_areas.z_area_right.installEventFilter(self)
-        self.z_areas.z_area_bottom.installEventFilter(self)  # Added
+        self.z_areas.z_area_bottom.installEventFilter(self)
+        self.z_areas.z_area_top.installEventFilter(self)  # Added
+        self.z_areas.main_window.title_bar.installEventFilter(self)  # Updated
 
     def eventFilter(self, obj, event):
         if obj == self.z_areas.z_area_left:
@@ -53,11 +56,16 @@ class ZAreasEvents(QObject):
                 self.expand_area('right')
             elif event.type() == QEvent.Leave:
                 self.retract_area('right')
-        elif obj == self.z_areas.z_area_bottom:  # Added
+        elif obj == self.z_areas.z_area_bottom:
             if event.type() == QEvent.Enter:
                 self.expand_area('bottom')
             elif event.type() == QEvent.Leave:
                 self.retract_area('bottom')
+        elif obj == self.z_areas.z_area_top or obj == self.z_areas.main_window.title_bar:  # Added
+            if event.type() == QEvent.Enter:
+                self.expand_area('top')
+            elif event.type() == QEvent.Leave:
+                self.retract_area('top')
         return super().eventFilter(obj, event)
 
     def expand_area(self, side):
@@ -69,26 +77,24 @@ class ZAreasEvents(QObject):
             self.z_areas.is_right_expanded = True
             area = self.z_areas.z_area_right
             x = self.z_areas.parent.width() - int(self.z_areas.parent.width() * self.z_areas.expanded_side_areas_width_ratio)
-        elif side == 'bottom' and not self.z_areas.is_bottom_expanded:  # Added
+        elif side == 'bottom' and not self.z_areas.is_bottom_expanded:
             self.z_areas.is_bottom_expanded = True
             area = self.z_areas.z_area_bottom
             y = self.z_areas.parent.height() - int(self.z_areas.parent.height() * self.z_areas.expanded_bottom_height_ratio)
+        elif side == 'top' and not self.z_areas.is_top_expanded:  # Added
+            self.z_areas.is_top_expanded = True
+            area = self.z_areas.z_area_top
+            y = 0
         else:
             return
 
         if side in ['left', 'right']:
             bottom_height = self.z_areas.z_area_bottom.height()
-            area.setGeometry(
-                x, 
-                0, 
-                int(self.z_areas.parent.width() * self.z_areas.expanded_side_areas_width_ratio), 
-                self.z_areas.parent.height() - bottom_height)
-        elif side == 'bottom':  # Added
-            area.setGeometry(
-                0, 
-                y, 
-                self.z_areas.parent.width(), 
-                int(self.z_areas.parent.height() * self.z_areas.expanded_bottom_height_ratio))
+            area.setGeometry(x, 0, int(self.z_areas.parent.width() * self.z_areas.expanded_side_areas_width_ratio), self.z_areas.parent.height() - bottom_height)
+        elif side == 'bottom':
+            area.setGeometry(0, y, self.z_areas.parent.width(), int(self.z_areas.parent.height() * self.z_areas.expanded_bottom_height_ratio))
+        elif side == 'top':  # Added
+            area.setGeometry(0, y, self.z_areas.parent.width(), int(self.z_areas.parent.height() * self.z_areas.expanded_top_height_ratio))
 
     def retract_area(self, side):
         if side == 'left' and self.z_areas.is_left_expanded:
@@ -99,30 +105,32 @@ class ZAreasEvents(QObject):
             self.z_areas.is_right_expanded = False
             area = self.z_areas.z_area_right
             x = self.z_areas.parent.width() - int(self.z_areas.parent.width() * self.z_areas.side_areas_width_ratio)
-        elif side == 'bottom' and self.z_areas.is_bottom_expanded:  # Added
+        elif side == 'bottom' and self.z_areas.is_bottom_expanded:
             self.z_areas.is_bottom_expanded = False
             area = self.z_areas.z_area_bottom
             y = self.z_areas.parent.height() - int(self.z_areas.parent.height() * self.z_areas.bottom_height_ratio)
+        elif side == 'top' and self.z_areas.is_top_expanded:  # Added
+            self.z_areas.is_top_expanded = False
+            area = self.z_areas.z_area_top
+            y = 0
         else:
             return
 
         if side in ['left', 'right']:
             bottom_height = self.z_areas.z_area_bottom.height()
-            area.setGeometry(
-                x, 
-                0, 
-                int(self.z_areas.parent.width() * self.z_areas.side_areas_width_ratio),
-                self.z_areas.parent.height() - bottom_height)
-        elif side == 'bottom':  # Added
-            area.setGeometry(
-                0, 
-                y, 
-                self.z_areas.parent.width(), 
-                int(self.z_areas.parent.height() * self.z_areas.bottom_height_ratio))
+            area.setGeometry(x, 0, int(self.z_areas.parent.width() * self.z_areas.side_areas_width_ratio), self.z_areas.parent.height() - bottom_height)
+        elif side == 'bottom':
+            area.setGeometry(0, y, self.z_areas.parent.width(), int(self.z_areas.parent.height() * self.z_areas.bottom_height_ratio))
+        elif side == 'top':  # Added
+            area.setGeometry(0, y, self.z_areas.parent.width(), int(self.z_areas.parent.height() * self.z_areas.top_height_ratio))
+
+
+
 
 class ZAreas:
     def __init__(self, 
             parent, 
+            main_window,
             bottom_height_ratio=0.045,
             expanded_bottom_height_ratio=None,
             top_height_ratio=None,
@@ -131,11 +139,13 @@ class ZAreas:
             expanded_side_areas_width_ratio=0.15,  # Expanded left width ratio
             spacing=1, 
             style="rgba(55, 55, 55, 0.8)"):
+        
         self.parent = parent
+        self.main_window = main_window  # Added
         self.bottom_height_ratio = bottom_height_ratio
-        self.expanded_bottom_height_ratio = expanded_bottom_height_ratio * 2 if expanded_bottom_height_ratio is not None else bottom_height_ratio * 2
-        self.top_height_ratio = top_height_ratio if top_height_ratio is not None else 0
-        self.expanded_top_height_ratio = bottom_height_ratio * 3 if expanded_top_height_ratio is not None else expanded_top_height_ratio
+        self.expanded_bottom_height_ratio = bottom_height_ratio * 2 if expanded_bottom_height_ratio is None else expanded_bottom_height_ratio
+        self.top_height_ratio = 0 if top_height_ratio is None else top_height_ratio
+        self.expanded_top_height_ratio = bottom_height_ratio * 3 if expanded_top_height_ratio is None else expanded_top_height_ratio
         self.side_areas_width_ratio = side_areas_width_ratio
         self.expanded_side_areas_width_ratio = expanded_side_areas_width_ratio
         self.spacing = spacing
@@ -145,10 +155,6 @@ class ZAreas:
         self.is_bottom_expanded = False
         self.is_top_expanded = False
         
-
-        
-        pt(top_height_ratio, bottom_height_ratio, side_areas_width_ratio, expanded_side_areas_width_ratio, spacing, style)
-        # pt(self.width)
         self.init_main_areas(parent)
         self.add_widgets_to_areas()
         self.update_geometries(parent.width(), parent.height())
@@ -249,22 +255,22 @@ class OrganizationallyView(QMainWindow):
         self.grabbing_edge_size = 10
         self.spacing_between_widgets = 10
         self.edge_margin = 10
-        
+
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setGeometry(1111, 333, 1920, 1080)
         self.resizing = False
-        
+
         self.theme_menu_bg_color = "rgba(55, 55, 55, 0.8)"
         self.theme_menu_text_color = "#D8DEE9"
         self.theme_menu_style = f"background: {self.theme_menu_bg_color}; color: {self.theme_menu_text_color};"
         self.ui_frame_style = "background: transparent;"
         self.edge_button_style = "background: transparent;"
         self.default_widget_style = f"background: rgba(33, 33, 33, 0.999); color: {self.theme_menu_text_color};"
-        
+
         self.bg_movie_speed = 33
-        
+
         self.init_ui()
-        self.z_areas = ZAreas(self.ui_frame, style=self.theme_menu_style)
+        self.z_areas = ZAreas(self.ui_frame, self, style=self.theme_menu_style)  # Updated
         self.z_areas_events = ZAreasEvents(self.z_areas)
 
         self.events = OrganizationallyViewEvents(self)
