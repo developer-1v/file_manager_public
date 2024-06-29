@@ -10,7 +10,7 @@ import sys
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QMovie
 from PySide6.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout, QHBoxLayout, QLineEdit, QTreeView, QFrame, QFileSystemModel, QSizePolicy, QPushButton
-from PySide6.QtWidgets import QMainWindow, QStatusBar, QMenuBar, QWidget, QVBoxLayout
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout
 
 
 class OrganizationallyView(QMainWindow):
@@ -107,32 +107,34 @@ class OrganizationallyView(QMainWindow):
         self.title_bar_layout.addWidget(self.maximize_button)
         self.title_bar_layout.addWidget(self.close_button)
 
-    def create_edge_buttons(self):
+    def create_edge_buttons(self, debug=False):
         self.left_edge_button = QPushButton(self)
-        # self.left_edge_button.setStyleSheet(self.edge_button_style)
-        self.left_edge_button.setStyleSheet('background: rgba(255, 0, 0, 1);')
         self.left_edge_button.setMouseTracking(True)
-
+        
         self.right_edge_button = QPushButton(self)
-        # self.right_edge_button.setStyleSheet(self.edge_button_style)
-        self.right_edge_button.setStyleSheet('background: rgba(255, 0, 0, 1);')
         self.right_edge_button.setMouseTracking(True)
-
+        
         self.bottom_edge_button = QPushButton(self)
-        # self.bottom_edge_button.setStyleSheet(self.edge_button_style)
-        self.bottom_edge_button.setStyleSheet('background: rgba(0, 255, 0, 1);')
         self.bottom_edge_button.setMouseTracking(True)
-
+        
         self.left_bottom_corner_button = QPushButton(self)
-        # self.left_bottom_corner_button.setStyleSheet(self.edge_button_style)
-        self.left_bottom_corner_button.setStyleSheet('background: rgba(0, 0, 255, 1);')
         self.left_bottom_corner_button.setMouseTracking(True)
-
+        
         self.right_bottom_corner_button = QPushButton(self)
-        # self.right_bottom_corner_button.setStyleSheet(self.edge_button_style)
-        self.right_bottom_corner_button.setStyleSheet('background: rgba(0, 0, 255, 1);')
         self.right_bottom_corner_button.setMouseTracking(True)
-
+        
+        if not debug:
+            self.left_edge_button.setStyleSheet(self.edge_button_style)
+            self.right_edge_button.setStyleSheet(self.edge_button_style)
+            self.bottom_edge_button.setStyleSheet(self.edge_button_style)
+            self.left_bottom_corner_button.setStyleSheet(self.edge_button_style)
+            self.right_bottom_corner_button.setStyleSheet(self.edge_button_style)
+        else:
+            self.left_edge_button.setStyleSheet('background: rgba(255, 0, 0, 1);')
+            self.right_edge_button.setStyleSheet('background: rgba(255, 0, 0, 1);')
+            self.bottom_edge_button.setStyleSheet('background: rgba(0, 255, 0, 1);')
+            self.left_bottom_corner_button.setStyleSheet('background: rgba(0, 0, 255, 1);')
+            self.right_bottom_corner_button.setStyleSheet('background: rgba(0, 0, 255, 1);')
 
     def create_ui_frame(self):
         self.ui_frame = QFrame(self.central_widget)
@@ -282,12 +284,6 @@ class OrganizationallyViewEvents:
         elif pos.y() >= screen_geometry.height() - margin:  # Snap to bottom
             self.view.setGeometry(screen_geometry.x(), screen_geometry.height() // 2, screen_geometry.width(), screen_geometry.height() // 2)
 
-    def on_edge_enter(self, event):
-        self.view.setCursor(Qt.SizeFDiagCursor)
-
-    def on_edge_leave(self, event):
-        self.view.setCursor(Qt.ArrowCursor)
-
     def reset_size_to_half_and_center(self):
         screen = QApplication.primaryScreen()
         screen_geometry = screen.geometry()
@@ -341,131 +337,6 @@ if __name__ == "__main__":
 
 
 
+'''
 
 
-
-
-
-
-
-
-    def start_drag(self, event):
-        if event.button() == Qt.LeftButton:
-            self.drag_position = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-            event.accept()
-
-    def do_drag(self, event):
-        if hasattr(self, 'drag_position'):
-            if event.buttons() == Qt.LeftButton:
-                self.move(event.globalPosition().toPoint() - self.drag_position)
-                event.accept()
-        else:
-            self.start_drag(event)
-
-    def do_resize(self, event):
-        if self.resizing and hasattr(self, 'drag_position'):
-            delta = event.globalPosition().toPoint() - self.drag_position
-            new_width = self.width()
-            new_height = self.height()
-            new_x = self.x()
-            new_y = self.y()
-
-            if self.drag_position.x() <= 10:  # Left edge
-                new_width -= delta.x()
-                new_x += delta.x()
-            elif self.drag_position.x() >= self.width() - 10:  # Right edge
-                new_width += delta.x()
-            if self.drag_position.y() >= self.height() - 10:  # Bottom edge
-                new_height += delta.y()
-
-            self.setGeometry(new_x, new_y, new_width, new_height)
-            self.drag_position = event.globalPosition().toPoint()
-            
-            
-    def start_resize(self, event):
-        if event.button() == Qt.LeftButton:
-            self.drag_position = event.globalPosition().toPoint()
-            self.resizing = True
-            event.accept()
-
-    def stop_resize(self, event):
-        if event.button() == Qt.LeftButton:
-            self.resizing = False
-            event.accept()
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.resizing = False
-            self.check_snap(event.globalPosition().toPoint())  # Check for snap
-            event.accept()
-
-    def check_snap(self, pos):
-        screen = QApplication.primaryScreen()
-        screen_geometry = screen.geometry()
-        margin = 10
-
-        if pos.x() <= margin:  # Snap to left
-            self.setGeometry(screen_geometry.x(), screen_geometry.y(), screen_geometry.width() // 2, screen_geometry.height())
-        elif pos.x() >= screen_geometry.width() - margin:  # Snap to right
-            self.setGeometry(screen_geometry.width() // 2, screen_geometry.y(), screen_geometry.width() // 2, screen_geometry.height())
-        elif pos.y() <= margin:  # Snap to top
-            self.setGeometry(screen_geometry.x(), screen_geometry.y(), screen_geometry.width(), screen_geometry.height() // 2)
-        elif pos.y() >= screen_geometry.height() - margin:  # Snap to bottom
-            self.setGeometry(screen_geometry.x(), screen_geometry.height() // 2, screen_geometry.width(), screen_geometry.height() // 2)
-
-
-
-
-
-
-
-
-
-
-    def on_edge_enter(self, event):
-        self.setCursor(Qt.SizeFDiagCursor)
-
-    def on_edge_leave(self, event):
-        self.setCursor(Qt.ArrowCursor)
-
-    def reset_size_to_half_and_center(self):
-        screen = QApplication.primaryScreen()
-        screen_geometry = screen.geometry()
-        new_width = screen_geometry.width() // 2
-        new_height = screen_geometry.height() // 2
-        new_x = (screen_geometry.width() - new_width) // 2
-        new_y = (screen_geometry.height() - new_height) // 2
-        self.setGeometry(new_x, new_y, new_width, new_height)
-
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        button_size = int(self.width() * self.button_size_percentage)
-        button_spacing = int(self.width() * self.button_spacing_percentage)
-        
-        self.title_bar.setGeometry(0, 0, self.width(), self.title_bar_height)
-        self.title_label.setGeometry(self.width() // 2 - 100, 0, 200, self.title_bar_height)
-        self.reset_size_position_button.setGeometry(self.width() - 4 * (button_size + button_spacing), 0, button_size, self.title_bar_height)  # Adjust position
-        self.minimize_button.setGeometry(self.width() - 3 * (button_size + button_spacing), 0, button_size, self.title_bar_height)
-        self.maximize_button.setGeometry(self.width() - 2 * (button_size + button_spacing), 0, button_size, self.title_bar_height)
-        self.close_button.setGeometry(self.width() - (button_size), 0, button_size, self.title_bar_height)
-        self.ui_frame.setGeometry(0, self.title_bar_height, self.width(), self.height() - self.title_bar_height)
-
-
-        self.reset_size_position_button.setFixedSize(button_size, self.title_bar_height)
-        self.minimize_button.setFixedSize(button_size, self.title_bar_height)
-        self.maximize_button.setFixedSize(button_size, self.title_bar_height)
-        self.close_button.setFixedSize(button_size, self.title_bar_height)
-        
-        margin = 10
-        self.left_edge_button.setGeometry(0, 0, margin, self.height())
-        self.right_edge_button.setGeometry(self.width() - margin, 0, margin, self.height())
-        self.bottom_edge_button.setGeometry(0, self.height() - margin, self.width(), margin)
-
-    def toggle_maximize_restore(self):
-        if self.isMaximized():
-            self.showNormal()
-        else:
-            self.showMaximized()
-            
-            
-            '''
