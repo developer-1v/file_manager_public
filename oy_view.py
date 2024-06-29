@@ -1,4 +1,8 @@
-"Organizationally, your organization ally for file management, project management, research, and more"
+'''
+Organizationally: 
+Your organization ally for files, projects, research, and more!
+
+'''
 
 from print_tricks import pt
 
@@ -12,53 +16,55 @@ class OrganizationallyView(QMainWindow):
     def __init__(self):
         super().__init__()
         self.title_bar_height = 30
-        self.button_size_percentage = 0.075  # Button size as a percentage of window width
-        self.button_spacing_percentage = 0.01  # Spacing as a percentage of window width
+        self.button_size_percentage = 0.075
+        self.button_spacing_percentage = 0.01
         self.border_size = 10
         self.grabbing_edge_size = 10
         self.spacing_between_widgets = 10
-        
+        self.edge_margin = 10
+
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setGeometry(1111, 333, 1920, 1080)
         self.resizing = False
-        
-        ## Key: Background = Background color. Color = Text color.
+
         self.title_bar_style = "background: rgba(55, 55, 55, 0.8); color: #D8DEE9;"
-        # self.ui_frame_style = "background: rgba(222, 222, 222, 0.7); color: #D8DEE9;"
         self.ui_frame_style = "background: transparent;"
         self.edge_button_style = "background: transparent;"
-        self.default_widget_style = "background: rgba(33, 33, 33, 0.99); color: #D8DEE9;"
+        self.default_widget_style = "background: rgba(33, 33, 33, 0.999); color: #D8DEE9;"
 
         self.init_ui()
         self.show()
 
     def init_ui(self):
-        self.central_widget = QWidget(self)
-        self.setCentralWidget(self.central_widget)
+        self.create_central_widget()
         self.create_gif_background()
         self.create_title_bar()
-        self.createAdditionalUI()
-        self.createFileTreeView()
         self.create_edge_buttons()
+        self.create_ui_frame()
+        self.createAdditionalUI()
         self.create_layouts()
+
+
 
     def create_layouts(self):
         main_layout = QVBoxLayout(self.central_widget)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.addWidget(self.gif_label)
+        
+        self.ui_layout = QVBoxLayout()
+        self.ui_layout.setContentsMargins(0, 0, 0, 0)
+        self.ui_layout.setSpacing(self.spacing_between_widgets)
+        self.ui_layout.addWidget(self.label1)
+        self.ui_layout.addWidget(self.input1)
+        self.ui_layout.addWidget(self.label2)
+        self.ui_layout.addWidget(self.input2)
+        self.ui_layout.addWidget(self.file_tree)
+        
+        self.ui_frame.setLayout(self.ui_layout)
 
-        ui_layout = QVBoxLayout()
-        ui_layout.setContentsMargins(0, 0, 0, 0)
-        ui_layout.setSpacing(self.spacing_between_widgets)
-        ui_layout.addWidget(self.label1)
-        ui_layout.addWidget(self.input1)
-        ui_layout.addWidget(self.label2)
-        ui_layout.addWidget(self.input2)
-        ui_layout.addWidget(self.file_tree)
-
-        self.ui_frame = QFrame(self.central_widget)
-        self.ui_frame.setLayout(ui_layout)
-        self.ui_frame.setStyleSheet(self.ui_frame_style)
+    def create_central_widget(self):
+        self.central_widget = QWidget(self)
+        self.setCentralWidget(self.central_widget)
 
     def create_gif_background(self):
         self.gif_label = QLabel(self.central_widget)
@@ -67,7 +73,7 @@ class OrganizationallyView(QMainWindow):
         self.movie.start()
         self.gif_label.setScaledContents(True)
         self.gif_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        
+
     def create_title_bar(self):
         self.title_bar = QFrame(self)
         self.title_bar.setStyleSheet(self.title_bar_style)
@@ -87,61 +93,39 @@ class OrganizationallyView(QMainWindow):
         self.close_button.setStyleSheet(button_style)
 
         self.title_bar_layout.addStretch()
-        self.reset_size_position_button = QPushButton('[□]',self.title_bar)
-        # self.reset_size_position_button.setIcon(QIcon("path/to/fugue/icons/appropriate_icon.png"))  # Set appropriate icon
+        self.reset_size_position_button = QPushButton('[□]', self.title_bar)
         self.reset_size_position_button.setStyleSheet(button_style)
 
         self.title_bar_layout.addStretch()
         self.title_bar_layout.addWidget(self.title_label)
         self.title_bar_layout.addStretch()
-        self.title_bar_layout.addWidget(self.reset_size_position_button)  # Add half size button
+        self.title_bar_layout.addWidget(self.reset_size_position_button)
         self.title_bar_layout.addWidget(self.minimize_button)
         self.title_bar_layout.addWidget(self.maximize_button)
         self.title_bar_layout.addWidget(self.close_button)
 
-
-
-## TODO DELETE
-    def createAdditionalUI(self): ## TODO DELETE
-        self.label1 = QLabel("Label 1", self)
-        self.label1.setStyleSheet(self.default_widget_style)
-        self.label2 = QLabel("Label 2", self)
-        self.label2.setStyleSheet(self.default_widget_style)
-        self.input1 = QLineEdit(self)
-        self.input1.setStyleSheet(self.default_widget_style)
-        self.input2 = QLineEdit(self)
-        self.input2.setStyleSheet(self.default_widget_style)
-
-
-## TODO DELETE
-    def createFileTreeView(self): ## TODO DELETE
-        self.file_tree = QTreeView(self)
-        self.file_tree.setStyleSheet(self.default_widget_style)
-        self.file_model = QFileSystemModel()
-        self.file_model.setRootPath('')
-        self.file_tree.setModel(self.file_model)
-
-
     def create_edge_buttons(self):
-        margin = 10
-
         self.left_edge_button = QPushButton(self)
-        self.left_edge_button.setGeometry(0, 0, margin, self.height())
         self.left_edge_button.setStyleSheet(self.edge_button_style)
         self.left_edge_button.setMouseTracking(True)
 
         self.right_edge_button = QPushButton(self)
-        self.right_edge_button.setGeometry(self.width() - margin, 0, margin, self.height())
         self.right_edge_button.setStyleSheet(self.edge_button_style)
         self.right_edge_button.setMouseTracking(True)
 
         self.bottom_edge_button = QPushButton(self)
-        self.bottom_edge_button.setGeometry(0, self.height() - margin, self.width(), margin)
         self.bottom_edge_button.setStyleSheet(self.edge_button_style)
         self.bottom_edge_button.setMouseTracking(True)
 
+    def create_ui_frame(self):
+        self.ui_frame = QFrame(self.central_widget)
+        self.ui_frame.setStyleSheet(self.ui_frame_style)
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
+        self.update_sizes()
+
+    def update_sizes(self):
         button_size = int(self.width() * self.button_size_percentage)
         button_spacing = int(self.width() * self.button_spacing_percentage)
         
@@ -150,9 +134,11 @@ class OrganizationallyView(QMainWindow):
         
         ## Key setGeometry(x, y, width, height) - setGeometry Key
         self.title_bar.setGeometry(
-            self.border_size, 
+            0,
+            # self.border_size,
             0, 
-            self.width() - self.border_size*2, 
+            # self.width() - self.border_size*2, 
+            self.width(), 
             self.title_bar_height
         )
         self.title_label.setGeometry(self.width() // 2 - 100, 0, 200, self.title_bar_height)
@@ -174,9 +160,9 @@ class OrganizationallyView(QMainWindow):
         
         self.ui_frame.setGeometry(
             self.border_size,
-            self.title_bar_height,
+            self.title_bar_height + self.border_size,
             self.width() - self.border_size*2, 
-            self.height() - self.title_bar_height - self.border_size
+            self.height() - self.title_bar_height - self.border_size*2
         )
         
         
@@ -185,6 +171,26 @@ class OrganizationallyView(QMainWindow):
         self.left_edge_button.setGeometry(0, 0, self.grabbing_edge_size, self.height())
         self.right_edge_button.setGeometry(self.width() - self.grabbing_edge_size, 0, self.grabbing_edge_size, self.height())
         self.bottom_edge_button.setGeometry(0, self.height() - self.grabbing_edge_size, self.width(), self.grabbing_edge_size)
+
+## TODO DELETE
+    def createAdditionalUI(self): ## TODO DELETE
+        self.label1 = QLabel("Label 1", self)
+        self.label1.setStyleSheet(self.default_widget_style)
+        self.label2 = QLabel("Label 2", self)
+        self.label2.setStyleSheet(self.default_widget_style)
+        self.input1 = QLineEdit(self)
+        self.input1.setStyleSheet(self.default_widget_style)
+        self.input2 = QLineEdit(self)
+        self.input2.setStyleSheet(self.default_widget_style)
+        
+        
+        
+        self.file_tree = QTreeView(self)
+        self.file_tree.setStyleSheet(self.default_widget_style)
+        self.file_model = QFileSystemModel()
+        self.file_model.setRootPath('')
+        self.file_tree.setModel(self.file_model)
+
 
 
 if __name__ == "__main__":

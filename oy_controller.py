@@ -1,7 +1,7 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication
-from ory_model import OrganizationallyModel
-from ory_view import OrganizationallyView
+from oy_model import OrganizationallyModel
+from oy_view import OrganizationallyView
 
 class OrganizationallyController:
     def __init__(self):
