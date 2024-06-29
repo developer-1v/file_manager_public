@@ -26,24 +26,29 @@ from frame_areas.Properties import Properties
 from frame_areas.TreeView import TreeView
 
 class ZArea(QFrame):
-    def __init__(self, parent, color="red"):
+    def __init__(self, parent, style="Background: transparent;"):
         super().__init__(parent)
-        self.setStyleSheet(
-            f"background: rgba({color});"
-            )
+        self.setStyleSheet(style)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
 class ZAreas:
-    def __init__(self, parent, top_height_ratio=0.135, bottom_height_ratio=0.045, spacing=1):
+    def __init__(self, 
+            parent, 
+            top_height_ratio=0.135, 
+            bottom_height_ratio=0.045, 
+            spacing=1, 
+            style="rgba(55, 55, 55, 0.8)"):
         self.top_height_ratio = top_height_ratio
         self.bottom_height_ratio = bottom_height_ratio
         self.spacing = spacing
+        self.style = style
 
-        self.z_area_center = ZArea(parent, color="255, 0, 0, .5")
-        self.z_area_left_right = ZArea(parent, color="0, 255, 0, .5")
-        self.z_area_top_bot = ZArea(parent, color="0, 0, 255, .5")
-        self.z_area_top = ZArea(self.z_area_top_bot, color="0, 0, 255, .3")
-        self.z_area_bottom = ZArea(self.z_area_top_bot, color="0, 0, 255, .3")
+        self.z_area_center = ZArea(parent)
+        self.z_area_top_bot = ZArea(parent)
+        self.z_area_left_right = ZArea(parent)
+        
+        self.z_area_top = ZArea(self.z_area_top_bot, style=self.style)
+        self.z_area_bottom = ZArea(self.z_area_top_bot, style=self.style)
 
         self.update_geometries(parent.width(), parent.height())
         self.raise_areas()
@@ -78,8 +83,12 @@ class ZAreas:
         self.z_area_top.setGeometry(0, 0, width, top_height)
         self.z_area_bottom.setGeometry(0, height - bottom_height, width, bottom_height)
         if debug:
-            self.z_area_left_right.setGeometry(55, 55, width, height)
-            self.z_area_top_bot.setGeometry(111, 111, width, height)
+            ## Set colors to red, green, blue
+            self.z_area_center.setStyleSheet("background: red;")
+            self.z_area_left_right.setStyleSheet("background: green;")
+            self.z_area_top_bot.setStyleSheet("background: blue;")
+            self.z_area_left_right.setGeometry(5, 5, width, height)
+            self.z_area_top_bot.setGeometry(11, 11, width, height)
 
     def raise_areas(self):
         self.z_area_center.raise_()
@@ -104,15 +113,17 @@ class OrganizationallyView(QMainWindow):
         self.setGeometry(1111, 333, 1920, 1080)
         self.resizing = False
         
-        self.title_bar_style = "background: rgba(55, 55, 55, 0.8); color: #D8DEE9;"
+        self.theme_menu_bg_color = "rgba(55, 55, 55, 0.8)"
+        self.theme_menu_text_color = "#D8DEE9"
+        self.theme_menu_style = f"background: {self.theme_menu_bg_color}; color: {self.theme_menu_text_color};"
         self.ui_frame_style = "background: transparent;"
         self.edge_button_style = "background: transparent;"
-        self.default_widget_style = "background: rgba(33, 33, 33, 0.999); color: #D8DEE9;"
+        self.default_widget_style = f"background: rgba(33, 33, 33, 0.999); color: {self.theme_menu_text_color};"
         
         self.bg_movie_speed = 33
         
         self.init_ui()
-        self.z_areas = ZAreas(self.ui_frame)
+        self.z_areas = ZAreas(self.ui_frame, style=self.theme_menu_style)
         self.events = OrganizationallyViewEvents(self)
         self.show()
 
@@ -159,12 +170,12 @@ class OrganizationallyView(QMainWindow):
 
     def create_title_bar(self):
         self.title_bar = QFrame(self)
-        self.title_bar.setStyleSheet(self.title_bar_style)
+        self.title_bar.setStyleSheet(self.theme_menu_style)
         self.title_bar.setFixedHeight(self.title_bar_height)
         self.title_bar_layout = QHBoxLayout(self.title_bar)
         self.title_bar_layout.setContentsMargins(self.border_size, 0, 0, 0)  # Adjust left margin
 
-        self.menu_bar = MenuBar(self.title_bar)
+        self.menu_bar = MenuBar(self.title_bar, self.theme_menu_style)
         self.title_bar_layout.addWidget(self.menu_bar)
 
         self.title_label = QLabel("Custom Title Bar", self.title_bar)
