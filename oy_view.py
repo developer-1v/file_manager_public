@@ -42,8 +42,8 @@ class ZAreasEvents(QObject):
         self.z_areas.z_area_left.installEventFilter(self)
         self.z_areas.z_area_right.installEventFilter(self)
         self.z_areas.z_area_bottom.installEventFilter(self)
-        self.z_areas.z_area_top.installEventFilter(self)  # Added
-        self.z_areas.main_window.title_bar.installEventFilter(self)  # Updated
+        self.z_areas.z_area_top.installEventFilter(self)
+        self.z_areas.main_window.title_bar.installEventFilter(self)
 
     def eventFilter(self, obj, event):
         if obj == self.z_areas.z_area_left:
@@ -61,11 +61,15 @@ class ZAreasEvents(QObject):
                 self.expand_area('bottom')
             elif event.type() == QEvent.Leave:
                 self.retract_area('bottom')
-        elif obj == self.z_areas.z_area_top or obj == self.z_areas.main_window.title_bar:  # Added
+        elif obj == self.z_areas.z_area_top or obj == self.z_areas.main_window.title_bar:
             if event.type() == QEvent.Enter:
                 self.expand_area('top')
+                if obj == self.z_areas.main_window.title_bar:
+                    self.expand_title_bar()
             elif event.type() == QEvent.Leave:
                 self.retract_area('top')
+                if obj == self.z_areas.main_window.title_bar:
+                    self.retract_title_bar()
         return super().eventFilter(obj, event)
 
     def expand_area(self, side):
@@ -81,7 +85,7 @@ class ZAreasEvents(QObject):
             self.z_areas.is_bottom_expanded = True
             area = self.z_areas.z_area_bottom
             y = self.z_areas.parent.height() - int(self.z_areas.parent.height() * self.z_areas.expanded_bottom_height_ratio)
-        elif side == 'top' and not self.z_areas.is_top_expanded:  # Added
+        elif side == 'top' and not self.z_areas.is_top_expanded:
             self.z_areas.is_top_expanded = True
             area = self.z_areas.z_area_top
             y = 0
@@ -93,7 +97,7 @@ class ZAreasEvents(QObject):
             area.setGeometry(x, 0, int(self.z_areas.parent.width() * self.z_areas.expanded_side_areas_width_ratio), self.z_areas.parent.height() - bottom_height)
         elif side == 'bottom':
             area.setGeometry(0, y, self.z_areas.parent.width(), int(self.z_areas.parent.height() * self.z_areas.expanded_bottom_height_ratio))
-        elif side == 'top':  # Added
+        elif side == 'top':
             area.setGeometry(0, y, self.z_areas.parent.width(), int(self.z_areas.parent.height() * self.z_areas.expanded_top_height_ratio))
 
     def retract_area(self, side):
@@ -109,7 +113,7 @@ class ZAreasEvents(QObject):
             self.z_areas.is_bottom_expanded = False
             area = self.z_areas.z_area_bottom
             y = self.z_areas.parent.height() - int(self.z_areas.parent.height() * self.z_areas.bottom_height_ratio)
-        elif side == 'top' and self.z_areas.is_top_expanded:  # Added
+        elif side == 'top' and self.z_areas.is_top_expanded:
             self.z_areas.is_top_expanded = False
             area = self.z_areas.z_area_top
             y = 0
@@ -121,10 +125,14 @@ class ZAreasEvents(QObject):
             area.setGeometry(x, 0, int(self.z_areas.parent.width() * self.z_areas.side_areas_width_ratio), self.z_areas.parent.height() - bottom_height)
         elif side == 'bottom':
             area.setGeometry(0, y, self.z_areas.parent.width(), int(self.z_areas.parent.height() * self.z_areas.bottom_height_ratio))
-        elif side == 'top':  # Added
+        elif side == 'top':
             area.setGeometry(0, y, self.z_areas.parent.width(), int(self.z_areas.parent.height() * self.z_areas.top_height_ratio))
 
+    def expand_title_bar(self):
+        self.z_areas.main_window.title_bar.setFixedHeight(self.z_areas.main_window.title_bar_height + self.z_areas.main_window.border_size)
 
+    def retract_title_bar(self):
+        self.z_areas.main_window.title_bar.setFixedHeight(self.z_areas.main_window.title_bar_height)
 
 
 class ZAreas:
@@ -169,7 +177,7 @@ class ZAreas:
         self.z_area_top = ZArea(parent, style=self.style)
         self.z_area_bottom = ZArea(parent, style=self.style)
 
-    def update_geometries(self, width, height, debug=True):
+    def update_geometries(self, width, height, debug=False):
         top_height = int(height * self.top_height_ratio)
         bottom_height = int(height * self.bottom_height_ratio)
         side_width = int(width * self.side_areas_width_ratio)
