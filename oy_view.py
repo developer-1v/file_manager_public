@@ -32,6 +32,27 @@ class ZArea(QFrame):
             f"background: rgba({color});"
             )
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        
+class ZAreas:
+    def __init__(self, parent):
+        self.z_area_center = ZArea(parent, color="255, 0, 0, .5")
+        self.z_area_left_right = ZArea(parent, color="0, 255, 0, .5")
+        self.z_area_top_bot = ZArea(parent, color="0, 0, 255, .5")
+        self.update_geometries(parent.width(), parent.height())
+        self.raise_areas()
+
+    def update_geometries(self, width, height, debug=False):
+        self.z_area_center.setGeometry(0, 0, width, height)
+        self.z_area_left_right.setGeometry(0, 0, width, height)
+        self.z_area_top_bot.setGeometry(0, 0, width, height)
+        if debug:
+            self.z_area_left_right.setGeometry(55, 55, width, height)
+            self.z_area_top_bot.setGeometry(111, 111, width, height)
+
+    def raise_areas(self):
+        self.z_area_center.raise_()
+        self.z_area_left_right.raise_()
+        self.z_area_top_bot.raise_()
 
 
 class OrganizationallyView(QMainWindow):
@@ -57,6 +78,7 @@ class OrganizationallyView(QMainWindow):
         self.bg_movie_speed = 33
 
         self.init_ui()
+        self.z_areas = ZAreas(self.ui_frame)
         self.events = OrganizationallyViewEvents(self)
         self.show()
 
@@ -88,20 +110,20 @@ class OrganizationallyView(QMainWindow):
     def create_ui_frame(self):
         self.ui_frame = QFrame(self.central_widget)
         self.ui_frame.setStyleSheet(self.ui_frame_style)
-        self.create_z_areas()
+        # self.create_z_areas()
 
-    def create_z_areas(self):
-        self.z_area_center = ZArea(self.ui_frame, color="255, 0, 0, .5")
-        self.z_area_left_right = ZArea(self.ui_frame, color="0, 255, 0, .5")
-        self.z_area_top_bot = ZArea(self.ui_frame, color="0, 0, 255, .5")
+    # def create_z_areas(self):
+    #     self.z_area_center = ZArea(self.ui_frame, color="255, 0, 0, .5")
+    #     self.z_area_left_right = ZArea(self.ui_frame, color="0, 255, 0, .5")
+    #     self.z_area_top_bot = ZArea(self.ui_frame, color="0, 0, 255, .5")
 
-        self.z_area_center.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
-        self.z_area_left_right.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
-        self.z_area_top_bot.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
+    #     self.z_area_center.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
+    #     self.z_area_left_right.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
+    #     self.z_area_top_bot.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
 
-        self.z_area_center.raise_()
-        self.z_area_left_right.raise_()
-        self.z_area_top_bot.raise_()
+    #     self.z_area_center.raise_()
+    #     self.z_area_left_right.raise_()
+    #     self.z_area_top_bot.raise_()
 
 
     def create_central_widget(self):
@@ -179,12 +201,11 @@ class OrganizationallyView(QMainWindow):
             self.left_bottom_corner_button.setStyleSheet('background: rgba(0, 0, 255, 1);')
             self.right_bottom_corner_button.setStyleSheet('background: rgba(0, 0, 255, 1);')
 
-
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.update_sizes()
 
-    def update_sizes(self, debug=True):
+    def update_sizes(self, debug=False):
         button_size = int(self.width() * self.button_size_percentage)
         button_spacing = int(self.width() * self.button_spacing_percentage)
         
@@ -223,15 +244,7 @@ class OrganizationallyView(QMainWindow):
             self.width() - self.border_size*2, 
             self.height() - self.title_bar_height - self.border_size*2
         )
-        self.z_area_center.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
-        self.z_area_left_right.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
-        self.z_area_top_bot.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
-        
-        if debug:
-            ## Debugging the Z- layers to see if they are in the correct z order. 
-            self.z_area_center.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
-            self.z_area_left_right.setGeometry(55, 55, self.ui_frame.width(), self.ui_frame.height())
-            self.z_area_top_bot.setGeometry(111, 111, self.ui_frame.width(), self.ui_frame.height())
+
 
         
         
@@ -245,6 +258,8 @@ class OrganizationallyView(QMainWindow):
         self.left_bottom_corner_button.setGeometry(0, self.height() - self.grabbing_edge_size*corner_multiplier, self.grabbing_edge_size*corner_multiplier, self.grabbing_edge_size*corner_multiplier)
         self.right_bottom_corner_button.setGeometry(self.width() - self.grabbing_edge_size*corner_multiplier, self.height() - self.grabbing_edge_size*corner_multiplier, self.grabbing_edge_size*corner_multiplier, self.grabbing_edge_size*corner_multiplier)
 
+        self.z_areas.update_geometries(self.ui_frame.width(), self.ui_frame.height())
+        self.z_areas.raise_areas()
 
 # ## TODO DELETE
 #     def createAdditionalUI(self): ## TODO DELETE
