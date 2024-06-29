@@ -30,20 +30,12 @@ class MainWindow(QMainWindow):
         self.setStyleSheet("background-color: #2E3440; color: #D8DEE9;")
         
         self.generic_spacing = 0
-        # self.create_background_gif("lightspeed-10957.gif")  # Set background GIF
-        ## slow down the gif
 
         self.create_top_frame_area()
         self.create_middle_frame_area()
         self.create_bottom_frame_area()
 
-    def create_background_gif(self, gif_path):
-        movie = QMovie(gif_path)
-        label = QLabel(self)
-        label.setMovie(movie)
-        movie.start()
-        self.centralWidget().layout().addWidget(label)
-        label.lower()  # Ensure the label is at the bottom
+
 
 
     def create_top_frame_area(self):

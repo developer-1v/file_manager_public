@@ -324,12 +324,10 @@ class OrganizationallyViewEvents:
 
 
 
-
 if __name__ == "__main__":
     app = QApplication([])
     player = OrganizationallyView()
     sys.exit(app.exec())
-    
 
 
 '''
