@@ -12,6 +12,18 @@ from PySide6.QtGui import QMovie
 from PySide6.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout, QHBoxLayout, QLineEdit, QTreeView, QFrame, QFileSystemModel, QSizePolicy, QPushButton
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout
 
+from frame_areas.MenuBar import MenuBar
+from frame_areas.CommandBar import CommandBar
+from frame_areas.TopFrame3 import TopFrame3
+from frame_areas.TopFrame4 import TopFrame4
+from frame_areas.OrgAccess import OrgAccess
+from frame_areas.OrgSubAccess import OrgSubAccess
+from frame_areas.FileExplorer import FileExplorer
+from frame_areas.AIArea import AIArea
+from frame_areas.SearchArea import SearchArea
+from frame_areas.Status import Status
+from frame_areas.Properties import Properties
+from frame_areas.TreeView import TreeView
 
 class OrganizationallyView(QMainWindow):
     def __init__(self):
@@ -83,6 +95,9 @@ class OrganizationallyView(QMainWindow):
         self.title_bar.setFixedHeight(self.title_bar_height)
         self.title_bar_layout = QHBoxLayout(self.title_bar)
         self.title_bar_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.menu_bar = MenuBar(self.title_bar)  # Add MenuBar to the title bar
+        self.title_bar_layout.addWidget(self.menu_bar)  # Add MenuBar to the layout
 
         self.title_label = QLabel("Custom Title Bar", self.title_bar)
         self.title_label.setAlignment(Qt.AlignCenter)
