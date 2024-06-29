@@ -34,17 +34,49 @@ class ZArea(QFrame):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
 class ZAreas:
-    def __init__(self, parent):
+    def __init__(self, parent, top_height_ratio=0.135, bottom_height_ratio=0.045, spacing=1):
+        self.top_height_ratio = top_height_ratio
+        self.bottom_height_ratio = bottom_height_ratio
+        self.spacing = spacing
+
         self.z_area_center = ZArea(parent, color="255, 0, 0, .5")
         self.z_area_left_right = ZArea(parent, color="0, 255, 0, .5")
         self.z_area_top_bot = ZArea(parent, color="0, 0, 255, .5")
+        self.z_area_top = ZArea(self.z_area_top_bot, color="0, 0, 255, .3")
+        self.z_area_bottom = ZArea(self.z_area_top_bot, color="0, 0, 255, .3")
+
         self.update_geometries(parent.width(), parent.height())
         self.raise_areas()
 
+        # Add widgets to top area
+        self.command_bar = CommandBar(self.z_area_top)
+        self.top_frame3 = TopFrame3(self.z_area_top)
+        self.top_frame4 = TopFrame4(self.z_area_top)
+        top_layout = QVBoxLayout(self.z_area_top)
+        top_layout.setSpacing(self.spacing)
+        top_layout.addWidget(self.command_bar)
+        top_layout.addWidget(self.top_frame3)
+        top_layout.addWidget(self.top_frame4)
+        self.z_area_top.setLayout(top_layout)
+
+        # Add widgets to bottom area
+        self.status = Status(self.z_area_bottom)
+        self.properties = Properties(self.z_area_bottom)
+        self.tree_view = TreeView(self.z_area_bottom)
+        bottom_layout = QHBoxLayout(self.z_area_bottom)
+        bottom_layout.addWidget(self.status)
+        bottom_layout.addWidget(self.properties)
+        bottom_layout.addWidget(self.tree_view)
+        self.z_area_bottom.setLayout(bottom_layout)
+
     def update_geometries(self, width, height, debug=False):
+        top_height = int(height * self.top_height_ratio)
+        bottom_height = int(height * self.bottom_height_ratio)
         self.z_area_center.setGeometry(0, 0, width, height)
         self.z_area_left_right.setGeometry(0, 0, width, height)
         self.z_area_top_bot.setGeometry(0, 0, width, height)
+        self.z_area_top.setGeometry(0, 0, width, top_height)
+        self.z_area_bottom.setGeometry(0, height - bottom_height, width, bottom_height)
         if debug:
             self.z_area_left_right.setGeometry(55, 55, width, height)
             self.z_area_top_bot.setGeometry(111, 111, width, height)
@@ -53,6 +85,8 @@ class ZAreas:
         self.z_area_center.raise_()
         self.z_area_left_right.raise_()
         self.z_area_top_bot.raise_()
+        self.z_area_top.raise_()
+        self.z_area_bottom.raise_()
 
 
 class OrganizationallyView(QMainWindow):
@@ -65,18 +99,18 @@ class OrganizationallyView(QMainWindow):
         self.grabbing_edge_size = 10
         self.spacing_between_widgets = 10
         self.edge_margin = 10
-
+        
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setGeometry(1111, 333, 1920, 1080)
         self.resizing = False
-
+        
         self.title_bar_style = "background: rgba(55, 55, 55, 0.8); color: #D8DEE9;"
         self.ui_frame_style = "background: transparent;"
         self.edge_button_style = "background: transparent;"
         self.default_widget_style = "background: rgba(33, 33, 33, 0.999); color: #D8DEE9;"
-
+        
         self.bg_movie_speed = 33
-
+        
         self.init_ui()
         self.z_areas = ZAreas(self.ui_frame)
         self.events = OrganizationallyViewEvents(self)
@@ -99,11 +133,6 @@ class OrganizationallyView(QMainWindow):
         self.ui_layout = QVBoxLayout()
         self.ui_layout.setContentsMargins(0, 0, 0, 0)
         self.ui_layout.setSpacing(self.spacing_between_widgets)
-        # self.ui_layout.addWidget(self.label1)
-        # self.ui_layout.addWidget(self.input1)
-        # self.ui_layout.addWidget(self.label2)
-        # self.ui_layout.addWidget(self.input2)
-        # self.ui_layout.addWidget(self.file_tree)
         
         self.ui_frame.setLayout(self.ui_layout)
 
@@ -112,18 +141,7 @@ class OrganizationallyView(QMainWindow):
         self.ui_frame.setStyleSheet(self.ui_frame_style)
         # self.create_z_areas()
 
-    # def create_z_areas(self):
-    #     self.z_area_center = ZArea(self.ui_frame, color="255, 0, 0, .5")
-    #     self.z_area_left_right = ZArea(self.ui_frame, color="0, 255, 0, .5")
-    #     self.z_area_top_bot = ZArea(self.ui_frame, color="0, 0, 255, .5")
 
-    #     self.z_area_center.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
-    #     self.z_area_left_right.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
-    #     self.z_area_top_bot.setGeometry(0, 0, self.ui_frame.width(), self.ui_frame.height())
-
-    #     self.z_area_center.raise_()
-    #     self.z_area_left_right.raise_()
-    #     self.z_area_top_bot.raise_()
 
 
     def create_central_widget(self):
@@ -144,10 +162,10 @@ class OrganizationallyView(QMainWindow):
         self.title_bar.setStyleSheet(self.title_bar_style)
         self.title_bar.setFixedHeight(self.title_bar_height)
         self.title_bar_layout = QHBoxLayout(self.title_bar)
-        self.title_bar_layout.setContentsMargins(0, 0, 0, 0)
+        self.title_bar_layout.setContentsMargins(self.border_size, 0, 0, 0)  # Adjust left margin
 
-        self.menu_bar = MenuBar(self.title_bar)  # Add MenuBar to the title bar
-        self.title_bar_layout.addWidget(self.menu_bar)  # Add MenuBar to the layout
+        self.menu_bar = MenuBar(self.title_bar)
+        self.title_bar_layout.addWidget(self.menu_bar)
 
         self.title_label = QLabel("Custom Title Bar", self.title_bar)
         self.title_label.setAlignment(Qt.AlignCenter)
@@ -261,24 +279,6 @@ class OrganizationallyView(QMainWindow):
         self.z_areas.update_geometries(self.ui_frame.width(), self.ui_frame.height())
         self.z_areas.raise_areas()
 
-# ## TODO DELETE
-#     def createAdditionalUI(self): ## TODO DELETE
-#         self.label1 = QLabel("Label 1", self)
-#         self.label1.setStyleSheet(self.default_widget_style)
-#         self.label2 = QLabel("Label 2", self)
-#         self.label2.setStyleSheet(self.default_widget_style)
-#         self.input1 = QLineEdit(self)
-#         self.input1.setStyleSheet(self.default_widget_style)
-#         self.input2 = QLineEdit(self)
-#         self.input2.setStyleSheet(self.default_widget_style)
-        
-        
-        
-#         self.file_tree = QTreeView(self)
-#         self.file_tree.setStyleSheet(self.default_widget_style)
-#         self.file_model = QFileSystemModel()
-#         self.file_model.setRootPath('')
-#         self.file_tree.setModel(self.file_model)
 
 
 

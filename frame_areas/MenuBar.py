@@ -1,8 +1,8 @@
 from PySide6.QtWidgets import QMenuBar
 
 class MenuBar(QMenuBar):
-    def __init__(self, parent=None):  # Add parent parameter with default value
-        super().__init__(parent)  # Pass parent to the superclass constructor
+    def __init__(self, parent=None):
+        super().__init__(parent)
         self.name = "Menu Bar"
         self.setToolTip(self.name)
         self.addMenu("File")

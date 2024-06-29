@@ -2,8 +2,8 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
 from PySide6.QtCore import Qt
 
 class Properties(QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent)
         self.name = "Properties"
         self.initUI()
 
