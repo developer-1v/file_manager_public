@@ -39,52 +39,111 @@ class ZAreasEvents(QObject):
         super().__init__()
         self.z_areas = z_areas
         self.z_areas.z_area_left.installEventFilter(self)
+        self.z_areas.z_area_right.installEventFilter(self)
+        self.z_areas.z_area_bottom.installEventFilter(self)  # Added
 
     def eventFilter(self, obj, event):
         if obj == self.z_areas.z_area_left:
             if event.type() == QEvent.Enter:
-                self.expand_left_area()
+                self.expand_area('left')
             elif event.type() == QEvent.Leave:
-                self.retract_left_area()
+                self.retract_area('left')
+        elif obj == self.z_areas.z_area_right:
+            if event.type() == QEvent.Enter:
+                self.expand_area('right')
+            elif event.type() == QEvent.Leave:
+                self.retract_area('right')
+        elif obj == self.z_areas.z_area_bottom:  # Added
+            if event.type() == QEvent.Enter:
+                self.expand_area('bottom')
+            elif event.type() == QEvent.Leave:
+                self.retract_area('bottom')
         return super().eventFilter(obj, event)
 
-    def expand_left_area(self):
-        if not self.z_areas.is_left_expanded:
+    def expand_area(self, side):
+        if side == 'left' and not self.z_areas.is_left_expanded:
             self.z_areas.is_left_expanded = True
+            area = self.z_areas.z_area_left
+            x = 0
+        elif side == 'right' and not self.z_areas.is_right_expanded:
+            self.z_areas.is_right_expanded = True
+            area = self.z_areas.z_area_right
+            x = self.z_areas.parent.width() - int(self.z_areas.parent.width() * self.z_areas.expanded_side_areas_width_ratio)
+        elif side == 'bottom' and not self.z_areas.is_bottom_expanded:  # Added
+            self.z_areas.is_bottom_expanded = True
+            area = self.z_areas.z_area_bottom
+            y = self.z_areas.parent.height() - int(self.z_areas.parent.height() * self.z_areas.expanded_bottom_height_ratio)
+        else:
+            return
+
+        if side in ['left', 'right']:
             bottom_height = self.z_areas.z_area_bottom.height()
-            self.z_areas.z_area_left.setGeometry(
-                0, 
+            area.setGeometry(
+                x, 
                 0, 
                 int(self.z_areas.parent.width() * self.z_areas.expanded_side_areas_width_ratio), 
-                self.z_areas.parent.height() - bottom_height)  # Use bottom area's height
-
-    def retract_left_area(self):
-        if self.z_areas.is_left_expanded:
-            self.z_areas.is_left_expanded = False
-            bottom_height = self.z_areas.z_area_bottom.height()
-            self.z_areas.z_area_left.setGeometry(
+                self.z_areas.parent.height() - bottom_height)
+        elif side == 'bottom':  # Added
+            area.setGeometry(
                 0, 
+                y, 
+                self.z_areas.parent.width(), 
+                int(self.z_areas.parent.height() * self.z_areas.expanded_bottom_height_ratio))
+
+    def retract_area(self, side):
+        if side == 'left' and self.z_areas.is_left_expanded:
+            self.z_areas.is_left_expanded = False
+            area = self.z_areas.z_area_left
+            x = 0
+        elif side == 'right' and self.z_areas.is_right_expanded:
+            self.z_areas.is_right_expanded = False
+            area = self.z_areas.z_area_right
+            x = self.z_areas.parent.width() - int(self.z_areas.parent.width() * self.z_areas.side_areas_width_ratio)
+        elif side == 'bottom' and self.z_areas.is_bottom_expanded:  # Added
+            self.z_areas.is_bottom_expanded = False
+            area = self.z_areas.z_area_bottom
+            y = self.z_areas.parent.height() - int(self.z_areas.parent.height() * self.z_areas.bottom_height_ratio)
+        else:
+            return
+
+        if side in ['left', 'right']:
+            bottom_height = self.z_areas.z_area_bottom.height()
+            area.setGeometry(
+                x, 
                 0, 
                 int(self.z_areas.parent.width() * self.z_areas.side_areas_width_ratio),
-                self.z_areas.parent.height() - bottom_height)  # Use bottom area's height
+                self.z_areas.parent.height() - bottom_height)
+        elif side == 'bottom':  # Added
+            area.setGeometry(
+                0, 
+                y, 
+                self.z_areas.parent.width(), 
+                int(self.z_areas.parent.height() * self.z_areas.bottom_height_ratio))
 
 class ZAreas:
     def __init__(self, 
             parent, 
-            bottom_height_ratio=0.045, 
+            bottom_height_ratio=0.045,
+            expanded_bottom_height_ratio=None,
             top_height_ratio=None,
+            expanded_top_height_ratio=None,
             side_areas_width_ratio=0.03,  # Initial left width ratio
             expanded_side_areas_width_ratio=0.15,  # Expanded left width ratio
             spacing=1, 
             style="rgba(55, 55, 55, 0.8)"):
         self.parent = parent
         self.bottom_height_ratio = bottom_height_ratio
-        self.top_height_ratio = top_height_ratio if top_height_ratio is not None else bottom_height_ratio * 3
+        self.expanded_bottom_height_ratio = expanded_bottom_height_ratio * 2 if expanded_bottom_height_ratio is not None else bottom_height_ratio * 2
+        self.top_height_ratio = top_height_ratio if top_height_ratio is not None else 0
+        self.expanded_top_height_ratio = bottom_height_ratio * 3 if expanded_top_height_ratio is not None else expanded_top_height_ratio
         self.side_areas_width_ratio = side_areas_width_ratio
         self.expanded_side_areas_width_ratio = expanded_side_areas_width_ratio
         self.spacing = spacing
         self.style = style
         self.is_left_expanded = False
+        self.is_right_expanded = False
+        self.is_bottom_expanded = False
+        self.is_top_expanded = False
         
 
         
