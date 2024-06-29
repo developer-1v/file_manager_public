@@ -2,5 +2,4 @@ __pycache__
 build_dist/
 build/
 dist/
-__pycache__
 *.pyc
