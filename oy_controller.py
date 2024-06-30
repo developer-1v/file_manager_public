@@ -45,25 +45,6 @@ class OrganizationallyController:
         self.view.right_bottom_corner_button.mousePressEvent = self.events.start_resize
         self.view.right_bottom_corner_button.mouseMoveEvent = self.events.do_resize
         self.view.right_bottom_corner_button.mouseReleaseEvent = self.events.stop_resize
-        
-        
-        
-        
-    #     self.view.z_areas.z_area_left.setMouseTracking(True)  # Enable mouse tracking
-    #     self.view.z_areas.z_area_left.enterEvent = self.expand_z_area_left
-    #     self.view.z_areas.z_area_left.leaveEvent = self.shrink_z_area_left
-
-    #     # Ensure parent containers do not block mouse events
-    #     self.view.z_areas.z_area_top_bot.setAttribute(Qt.WA_TransparentForMouseEvents, True)
-    #     self.view.z_areas.z_area_left_right.setAttribute(Qt.WA_TransparentForMouseEvents, True)
-
-    # def expand_z_area_left(self, event):
-    #     self.view.z_areas.z_area_left.setFixedWidth(200)  # Adjust the width as needed
-    #     pt()
-
-    # def shrink_z_area_left(self, event):
-    #     self.view.z_areas.z_area_left.setFixedWidth(100)  # Adjust the width as needed
-    #     pt()
 
 
 

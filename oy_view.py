@@ -19,7 +19,7 @@ from frame_areas.TopFrame3 import TopFrame3
 from frame_areas.TopFrame4 import TopFrame4
 from frame_areas.OrgAccess import OrgAccess
 from frame_areas.OrgSubAccess import OrgSubAccess
-from frame_areas.FileExplorer import FileExplorer
+from frame_areas.content_area.ContentArea import ContentArea
 from frame_areas.AIArea import AIArea
 from frame_areas.SearchArea import SearchArea
 from frame_areas.Status import Status
@@ -197,16 +197,34 @@ class ZAreas:
         self.ai_area.setFixedHeight(widget_height)
         self.search_area.setFixedHeight(widget_height)
         if debug:
-            self.z_area_middle.setStyleSheet("background: red;")
-            self.z_area_left.setStyleSheet("background: green;")
-            self.z_area_right.setStyleSheet("background: blue;")
+            self.z_area_middle.setStyleSheet("background: rgba(255, 0, 0, 0.9);")
+            self.z_area_left.setStyleSheet("background: rgba(0, 255, 0, 0.9);")
+            self.z_area_right.setStyleSheet("background: rgba(0, 0, 255, 0.9);")
 
     def add_widgets_to_areas(self):
-        self.add_widgets_to_left_area()
-        self.add_widgets_to_right_area()
         self.add_widgets_to_top_area()
+        self.add_widgets_to_left_area()
+        self.add_widgets_to_middle_area()
+        self.add_widgets_to_right_area()
         self.add_widgets_to_bottom_area()
-
+        
+    def add_widgets_to_top_area(self):
+        self.command_bar = CommandBar(self.z_area_top)
+        self.top_frame3 = TopFrame3(self.z_area_top)
+        self.top_frame4 = TopFrame4(self.z_area_top)
+        top_layout = QVBoxLayout(self.z_area_top)
+        top_layout.setSpacing(self.spacing)
+        top_layout.addWidget(self.command_bar)
+        top_layout.addWidget(self.top_frame3)
+        top_layout.addWidget(self.top_frame4)
+        self.z_area_top.setLayout(top_layout)
+    
+    def add_widgets_to_middle_area(self):
+        self.content_area = ContentArea(self.z_area_middle)
+        middle_layout = QVBoxLayout(self.z_area_middle)
+        middle_layout.addWidget(self.content_area)
+        self.z_area_middle.setLayout(middle_layout)
+        
     def add_widgets_to_left_area(self):
         self.org_access = OrgAccess(self.z_area_left)
         self.org_sub_access = OrgSubAccess(self.z_area_left)
@@ -222,17 +240,6 @@ class ZAreas:
         right_layout.addWidget(self.ai_area)
         right_layout.addWidget(self.search_area)
         self.z_area_right.setLayout(right_layout)
-
-    def add_widgets_to_top_area(self):
-        self.command_bar = CommandBar(self.z_area_top)
-        self.top_frame3 = TopFrame3(self.z_area_top)
-        self.top_frame4 = TopFrame4(self.z_area_top)
-        top_layout = QVBoxLayout(self.z_area_top)
-        top_layout.setSpacing(self.spacing)
-        top_layout.addWidget(self.command_bar)
-        top_layout.addWidget(self.top_frame3)
-        top_layout.addWidget(self.top_frame4)
-        self.z_area_top.setLayout(top_layout)
 
     def add_widgets_to_bottom_area(self):
         self.status = Status(self.z_area_bottom)
