@@ -49,8 +49,62 @@ class ContentArea(QFrame):
     def createScrollArea(self, layout):
         scroll_area = QScrollArea(self)
         scroll_area.setWidgetResizable(True)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         layout.addWidget(scroll_area)
         self.scroll_area = scroll_area
+
+        # Set custom style for scrollbars
+        self.scroll_area.setStyleSheet("""
+            QScrollBar:vertical, QScrollBar:horizontal {
+                background: transparent;
+                width: 8px;
+                height: 8px;
+            }
+            QScrollBar::handle:vertical, QScrollBar::handle:horizontal {
+                background: #888;
+                border-radius: 4px;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical,
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                background: none;
+            }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical,
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+                background: none;
+            }
+        """)
+
+
+    def mouseMoveEvent(self, event):
+        margin = 0.05  # 5% margin
+        width = self.width()
+        height = self.height()
+        x, y = event.x(), event.y()
+
+        if x < width * margin or x > width * (1 - margin) or y < height * margin or y > height * (1 - margin):
+            pt()
+            self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+            self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        else:
+            pt()
+            self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        super().mouseMoveEvent(event)
+
+
+    def enterEvent(self, event):
+        pt()
+        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        pt()
+        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        super().leaveEvent(event)
 
     def updateGrid(self):
         grid_widget = QFrame()
