@@ -21,8 +21,8 @@ class SortingModel(QSortFilterProxyModel):
         return file_info1.isDir() and self.sortOrder() == Qt.SortOrder.AscendingOrder
 
 class FileExplorer(QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent, style="Background: transparent;"):
+        super().__init__(parent)
         self.name = "File Explorer"
         self.current_path = os.path.expanduser('~')
         self.history = []

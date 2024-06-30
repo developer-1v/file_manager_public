@@ -45,10 +45,10 @@ class MainWindow(QMainWindow):
         top_layout = QVBoxLayout(top_frame)
         top_layout.setSpacing(self.generic_spacing)
 
-        menu_bar = MenuBar()
-        command_bar = CommandBar()
-        top_frame3 = TopFrame3()
-        top_frame4 = TopFrame4()
+        menu_bar = MenuBar(self)
+        command_bar = CommandBar(self)
+        top_frame3 = TopFrame3(self)
+        top_frame4 = TopFrame4(self)
 
         top_layout.addWidget(menu_bar)
         top_layout.addWidget(command_bar)
@@ -81,11 +81,11 @@ class MainWindow(QMainWindow):
         middle_layout = QHBoxLayout(middle_frame)
         middle_layout.setSpacing(self.generic_spacing)
 
-        org_access = self.create_collapsible_frame(OrgAccess(), org_access_pct)
-        org_sub_access = self.create_collapsible_frame(OrgSubAccess(), org_sub_access_pct)
+        org_access = self.create_collapsible_frame(OrgAccess(self), org_access_pct)
+        org_sub_access = self.create_collapsible_frame(OrgSubAccess(self), org_sub_access_pct)
         file_explorer_area = self.create_file_explorer_area()
-        ai_area = self.create_collapsible_frame(AIArea(), ai_area_pct)
-        search_area = self.create_collapsible_frame(SearchArea(), search_area_pct)
+        ai_area = self.create_collapsible_frame(AIArea(self), ai_area_pct)
+        search_area = self.create_collapsible_frame(SearchArea(self), search_area_pct)
 
         remaining_pct = 100 - (org_access_pct + org_sub_access_pct + ai_area_pct + search_area_pct)
 
@@ -104,9 +104,9 @@ class MainWindow(QMainWindow):
         bottom_layout = QHBoxLayout(bottom_frame)
         bottom_layout.setSpacing(self.generic_spacing)
 
-        status = Status()
-        properties = Properties()
-        tree_view = TreeView()
+        status = Status(self)
+        properties = Properties(self)
+        tree_view = TreeView(self)
 
         bottom_layout.addWidget(status)
         bottom_layout.addWidget(properties)
@@ -123,7 +123,7 @@ class MainWindow(QMainWindow):
         for _ in range(rows):  # 2 rows
             row_layout = QHBoxLayout()
             for _ in range(columns):  # 3 columns
-                file_explorer = FileExplorer()
+                file_explorer = FileExplorer(self)
                 row_layout.addWidget(file_explorer)
             file_explorer_layout.addLayout(row_layout)
 
