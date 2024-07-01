@@ -1,3 +1,5 @@
+from print_tricks import pt
+
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QTreeView, QHBoxLayout, QPushButton, QLineEdit, QApplication, QFileSystemModel
 from PySide6.QtCore import Qt, QDir, QEvent, QTimer, QModelIndex, QSortFilterProxyModel
 from PySide6.QtGui import QIcon
@@ -21,15 +23,23 @@ class SortingModel(QSortFilterProxyModel):
         return file_info1.isDir() and self.sortOrder() == Qt.SortOrder.AscendingOrder
 
 class FileExplorer(QWidget):
-    def __init__(self, parent, style="Background: transparent;"):
+    def __init__(self, parent, style="Background: transparent;", start_path=None):
         super().__init__(parent)
+        self.parent = parent, 
+        self.style = style
+        self.start_path = start_path
+
         self.name = "File Explorer"
-        self.current_path = os.path.expanduser('~')
+        self.current_path = start_path if start_path else os.path.expanduser('~')
         self.history = []
         self.history_index = -1
-        self.path_display_had_focus = False  # Initialize the focus flag
+        self.path_display_had_focus = False
+        
+        # pt(self.current_path, self.start_path)
 
         self.initUI()
+
+
 
     def initUI(self):
         self.setToolTip(self.name)
@@ -138,7 +148,8 @@ class FileExplorer(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    file_explorer = FileExplorer()
+    start_path = r'c:\Users\user\Pictures'
+    file_explorer = FileExplorer(None, start_path=start_path)
     file_explorer.resize(800, 600)
     file_explorer.show()
     sys.exit(app.exec())

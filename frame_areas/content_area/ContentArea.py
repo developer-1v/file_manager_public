@@ -15,6 +15,9 @@ import os
 import sys
 from frame_areas.content_area.FileExplorer import FileExplorer
 
+import json
+
+
 class ContentArea(QFrame):
     def __init__(self, 
             parent, 
@@ -34,10 +37,56 @@ class ContentArea(QFrame):
         self.zoom = zoom
         self.style = style
         self.content_size = content_size
+        self.data_file = "content_area_data.json"
+        self.cell_data = self.loadCellData()
         self.initUI()
         
         pt(self.size(), self.visible_rows, self.visible_cols, self.zoom)
+        # pt.t()
 
+    def loadCellData(self):
+        pt('load cell data')
+        if os.path.exists(self.data_file) and os.path.getsize(self.data_file) > 0:
+            with open(self.data_file, 'r') as file:
+                return json.load(file)
+        else:
+            return self.generateCellData()
+
+    def generateCellData(self):
+        pt('generate cell data')
+        cell_data = []
+        for row in range(self.rows):
+            row_data = []
+            for col in range(self.cols):
+                if (row + col) % 2 == 0:
+                    row_data.append({"type": "FileExplorer", "path": r"c:/Users/user/Documents"})  # Use forward slashes
+                else:
+                    row_data.append({"type": "QWebEngineView", "url": "https://www.example.com"})
+            cell_data.append(row_data)
+        with open(self.data_file, 'w') as file:
+            json.dump(cell_data, file)
+        return cell_data
+
+    def updateGrid(self):
+        pt('upgrade grid')
+        grid_widget = QFrame()
+        grid_layout = QGridLayout(grid_widget)
+        grid_widget.setLayout(grid_layout)
+        self.scroll_area.setWidget(grid_widget)
+        for row in range(self.rows):
+            for col in range(self.cols):
+                splitter = QSplitter(Qt.Horizontal)
+                cell_info = self.cell_data[row][col]
+                if cell_info["type"] == "FileExplorer":
+                    cell_widget = FileExplorer(self, start_path=cell_info["path"])  # Ensure path is correctly passed
+                else:
+                    cell_widget = QWebEngineView()
+                    cell_widget.setUrl(cell_info["url"])
+                splitter.addWidget(cell_widget)
+                grid_layout.addWidget(splitter, row, col)
+        self.adjustCellSize(grid_widget)
+
+        
     def initUI(self):
         self.resize(self.content_size[0], self.content_size[1])
         self.setToolTip(self.name)
@@ -84,11 +133,11 @@ class ContentArea(QFrame):
         x, y = event.x(), event.y()
 
         if x < width * margin or x > width * (1 - margin) or y < height * margin or y > height * (1 - margin):
-            pt()
+            # pt()
             self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         else:
-            pt()
+            # pt()
             self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
@@ -106,23 +155,6 @@ class ContentArea(QFrame):
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         super().leaveEvent(event)
-
-    def updateGrid(self):
-        grid_widget = QFrame()
-        grid_layout = QGridLayout(grid_widget)
-        grid_widget.setLayout(grid_layout)
-        self.scroll_area.setWidget(grid_widget)
-        for row in range(self.rows):
-            for col in range(self.cols):
-                splitter = QSplitter(Qt.Horizontal)
-                if (row + col) % 2 == 0:
-                    cell_widget = FileExplorer(self)
-                else:
-                    cell_widget = QWebEngineView()
-                    cell_widget.setUrl("https://www.example.com")
-                splitter.addWidget(cell_widget)
-                grid_layout.addWidget(splitter, row, col)
-        self.adjustCellSize(grid_widget)
 
     def onResize(self, event):
         self.adjustCellSize(self.scroll_area.widget())
@@ -154,6 +186,7 @@ class ContentArea(QFrame):
 
 
 if __name__ == "__main__":
+    pt.t()
     app = QApplication(sys.argv)
     content_area = ContentArea(
         None, 
