@@ -20,13 +20,15 @@ import json
 
 class ContentArea(QFrame):
     def __init__(self, 
-            parent, 
-            rows=12, 
-            cols=12, 
-            visible_rows=2, 
-            visible_cols=2, 
-            zoom=1.0, 
-            style="Background: transparent;", 
+            parent,
+            rows=12,
+            cols=12,
+            visible_rows=2,
+            visible_cols=2,
+            current_row=0,
+            current_col=0,
+            zoom=1.0,
+            style="Background: transparent;",
             content_size=(1920, 1080)):
         super().__init__(parent)
         self.name = "Content Area"
@@ -34,6 +36,8 @@ class ContentArea(QFrame):
         self.cols = cols
         self.visible_rows = visible_rows
         self.visible_cols = visible_cols
+        self.current_row = current_row
+        self.current_col = current_col
         self.zoom = zoom
         self.style = style
         self.content_size = content_size
@@ -73,6 +77,8 @@ class ContentArea(QFrame):
         grid_layout = QGridLayout(grid_widget)
         grid_widget.setLayout(grid_layout)
         self.scroll_area.setWidget(grid_widget)
+        self.scroll_area.verticalScrollBar().valueChanged.connect(self.printVisibleCells)
+        self.scroll_area.horizontalScrollBar().valueChanged.connect(self.printVisibleCells)
         for row in range(self.rows):
             for col in range(self.cols):
                 splitter = QSplitter(Qt.Horizontal)
@@ -85,7 +91,45 @@ class ContentArea(QFrame):
                 splitter.addWidget(cell_widget)
                 grid_layout.addWidget(splitter, row, col)
         self.adjustCellSize(grid_widget)
+        self.printVisibleCells()  # Print visible cells after updating the grid
 
+    def printVisibleCells(self, value=None, debug=True):
+        if not debug:
+            return
+        
+        vertical_scroll_value = self.scroll_area.verticalScrollBar().value()
+        horizontalScrollBar = self.scroll_area.horizontalScrollBar().value()
+        cell_size_x = self.size().width() / self.visible_cols
+        cell_size_y = self.size().height() / self.visible_rows
+        self.current_row = int(vertical_scroll_value / cell_size_y)
+        self.current_col = int(horizontalScrollBar / cell_size_x)
+        print(f"Current position: Row {self.current_row}, Col {self.current_col}")
+        pt.c("Visible cells:")
+        for row in range(self.current_row, self.current_row + self.visible_rows):
+            for col in range(self.current_col, self.current_col + self.visible_cols):
+                print(f"Cell ({row}, {col}): {self.cell_data[row][col]}")
+
+
+    def onResize(self, event):
+        self.adjustCellSize(self.scroll_area.widget())
+        self.printVisibleCells()  # Print visible cells on resize
+        super().resizeEvent(event)
+
+    def mouseMoveEvent(self, event):
+        margin = 0.05  # 5% margin
+        width = self.width()
+        height = self.height()
+        x, y = event.x(), event.y()
+
+        if x < width * margin or x > width * (1 - margin) or y < height * margin or y > height * (1 - margin):
+            self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+            self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        else:
+            self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        super().mouseMoveEvent(event)
+        self.printVisibleCells()  # P
         
     def initUI(self):
         self.resize(self.content_size[0], self.content_size[1])
@@ -126,22 +170,7 @@ class ContentArea(QFrame):
         """)
 
 
-    def mouseMoveEvent(self, event):
-        margin = 0.05  # 5% margin
-        width = self.width()
-        height = self.height()
-        x, y = event.x(), event.y()
 
-        if x < width * margin or x > width * (1 - margin) or y < height * margin or y > height * (1 - margin):
-            # pt()
-            self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-            self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        else:
-            # pt()
-            self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-            self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
-        super().mouseMoveEvent(event)
 
 
     def enterEvent(self, event):
@@ -156,9 +185,7 @@ class ContentArea(QFrame):
         self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         super().leaveEvent(event)
 
-    def onResize(self, event):
-        self.adjustCellSize(self.scroll_area.widget())
-        super().resizeEvent(event)
+
 
     def adjustCellSize(self, grid_widget):
         cell_size_x = self.size().width() / self.visible_cols

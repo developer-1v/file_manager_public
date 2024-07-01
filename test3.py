@@ -158,6 +158,8 @@ if __name__ == "__main__":
 
 
 '''
-
+2 -  load all rows and columns of the cells to take up space, but  don't load the contents for all of the cells. 
+4 - Load the contents of only the cells that we can see. 
+For exampke, if the grid is a 12x12 for 144 total cells, but our "visible_rows" and "visible_cols" are set to 2 each, then only the contents of the first 2 columns of the first 2 rows should be visible. 
 
 '''
