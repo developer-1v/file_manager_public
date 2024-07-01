@@ -45,6 +45,7 @@ class ContentArea(QFrame):
         self.setLayout(layout)
         self.createScrollArea(layout)
         self.updateGrid()
+        self.resizeEvent = self.onResize  # Connect resize event to onResize method
 
     def createScrollArea(self, layout):
         scroll_area = QScrollArea(self)
@@ -123,10 +124,19 @@ class ContentArea(QFrame):
                 grid_layout.addWidget(splitter, row, col)
         self.adjustCellSize(grid_widget)
 
+    def onResize(self, event):
+        self.adjustCellSize(self.scroll_area.widget())
+        super().resizeEvent(event)
+
     def adjustCellSize(self, grid_widget):
         cell_size_x = self.size().width() / self.visible_cols
         cell_size_y = self.size().height() / self.visible_rows
+        for row in range(self.rows):
+            for col in range(self.cols):
+                widget = grid_widget.layout().itemAtPosition(row, col).widget()
+                widget.setFixedSize(cell_size_x, cell_size_y)
         grid_widget.setMinimumSize(int(cell_size_x * self.cols), int(cell_size_y * self.rows))
+
 
 ## TODO NOT CALLED
     def setZoom(self, zoom):
