@@ -146,7 +146,9 @@ class ZAreas:
             side_areas_width_ratio=0.03,  # Initial left width ratio
             expanded_side_areas_width_ratio=0.15,  # Expanded left width ratio
             spacing=1, 
-            style="rgba(55, 55, 55, 0.8)"):
+            # style="rgba(55, 55, 55, 0.8)",
+            style='#2E3440'
+        ):
         
         self.parent = parent
         self.main_window = main_window  # Added
@@ -275,7 +277,7 @@ class OrganizationallyView(QMainWindow):
         self.setGeometry(1111, 333, 1920, 1080)
         self.resizing = False
 
-        self.theme_menu_bg_color = "rgba(55, 55, 55, 0.8)"
+        self.theme_menu_bg_color = "rgba(46, 52, 64, 0.8)"
         self.theme_menu_text_color = "#D8DEE9"
         self.theme_menu_style = f"background: {self.theme_menu_bg_color}; color: {self.theme_menu_text_color};"
         self.ui_frame_style = "background: transparent;"
@@ -342,17 +344,21 @@ class OrganizationallyView(QMainWindow):
         self.title_label = QLabel("Custom Title Bar", self.title_bar)
         self.title_label.setAlignment(Qt.AlignCenter)
 
-        button_style = "QPushButton { width: 30px; height: 30px; }"
+        button_size = 30
+        button_style = f"QPushButton {{ width: {button_size}px; height: {button_size}px; }}"
+        # button_style += "QPushButton { text-align: center; vertical-align: middle; }"
+        self.reset_size_position_button = QPushButton('[  □  ]', self.title_bar)
+        self.reset_size_position_button.setStyleSheet(button_style)
         self.minimize_button = QPushButton("-", self.title_bar)
         self.minimize_button.setStyleSheet(button_style)
-        self.maximize_button = QPushButton("□", self.title_bar)
+        self.maximize_button = QPushButton("⬜", self.title_bar)
         self.maximize_button.setStyleSheet(button_style)
+        self.maximize_button.setStyleSheet("font-size: 12px; vertical-align: middle;")
         self.close_button = QPushButton("X", self.title_bar)
         self.close_button.setStyleSheet(button_style)
 
+
         self.title_bar_layout.addStretch()
-        self.reset_size_position_button = QPushButton('[□]', self.title_bar)
-        self.reset_size_position_button.setStyleSheet(button_style)
 
         self.title_bar_layout.addStretch()
         self.title_bar_layout.addWidget(self.title_label)
